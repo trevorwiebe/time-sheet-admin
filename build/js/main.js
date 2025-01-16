@@ -24,5 +24,42 @@ document.addEventListener("DOMContentLoaded", () => {
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
 
-  
+  const menuLinks = document.querySelectorAll(".menu a");
+
+  menuLinks.forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      const page = event.target.getAttribute("data-page");
+      loadPage(page);
+    });
+  });
+
+  // Load the default page
+  loadPage("user-management");
 });
+
+// Define the content for each page
+const pages = {
+  "user-management": `
+    <h2>User Management</h2>
+    <p>Manage users, add new users, and update user details.</p>
+  `,
+  "organization-details": `
+    <h2>Organization Details</h2>
+    <p>View and update organization settings like pay period start day and duration.</p>
+  `,
+  "employee-hours": `
+    <h2>Employee Hours</h2>
+    <p>View employee hours and see who has confirmed their timesheets.</p>
+  `,
+  "approve-time-off": `
+    <h2>Approve Time Off</h2>
+    <p>Approve or reject pending time-off requests.</p>
+  `,
+};
+
+// Function to load the page content
+function loadPage(page) {
+  const content = document.getElementById("content");
+  content.innerHTML = pages[page] || `<h2>Page Not Found</h2>`;
+}
