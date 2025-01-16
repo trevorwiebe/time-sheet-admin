@@ -1,6 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-analytics.js";
+import { getFirestore, getDocs, collection } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js"
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -22,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize features or fetch initial data here
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
   const analytics = getAnalytics(app);
 
   const menuLinks = document.querySelectorAll(".menu a");
@@ -31,11 +33,14 @@ document.addEventListener("DOMContentLoaded", () => {
       event.preventDefault();
       const page = event.target.getAttribute("data-page");
       loadPage(page);
+      console.log("loading page " + page)
     });
   });
 
   // Load the default page
   loadPage("user-management");
+
+  fetchAllData(db)
 });
 
 // Define the content for each page
@@ -62,4 +67,14 @@ const pages = {
 function loadPage(page) {
   const content = document.getElementById("content");
   content.innerHTML = pages[page] || `<h2>Page Not Found</h2>`;
+}
+
+async function fetchAllData(db) {
+  const usersSnapshot = await getDocs(collection(db, "users"));
+  const users = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+  const orgSnapshot = await getDocs(collection(db, "organizations"));
+  const organizations = orgSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+  return { users, organizations };
 }
