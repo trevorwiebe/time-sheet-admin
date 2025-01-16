@@ -27,8 +27,8 @@ footer {
 }
 
 nav {
-  background: #003399;
-  color: white;
+  background: var(--primary);
+  color: black;
 }
 
 .menu {
@@ -45,12 +45,16 @@ nav {
 
 .menu a {
   text-decoration: none;
-  color: white;
+  color: black;
   font-weight: bold;
+  padding: 10px;
 }
 
 .menu a:hover {
-  text-decoration: underline;
+  transition: 0.2s;
+  background-color: var(--secondary);
+  border-radius: 5px;
+  color: white;
 }
 
 footer {
