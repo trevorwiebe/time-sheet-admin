@@ -1,0 +1,27 @@
+:root{
+  --primary: #CFD2CD;
+  --secondary: #50514F;
+  --tiertiary: #0C0A3E;
+  --background: #ffffff;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+header {
+  background: var(--primary);
+  color: black;
+  padding: 1rem;
+  text-align: center;
+}
+
+footer {
+  background: var(--secondary);
+  color: #333;
+  text-align: center;
+  padding: 1rem;
+}
