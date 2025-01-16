@@ -32,13 +32,12 @@ document.addEventListener("DOMContentLoaded", () => {
     link.addEventListener("click", (event) => {
       event.preventDefault();
       const page = event.target.getAttribute("data-page");
-      loadPage(page);
-      console.log("loading page " + page)
+      if(page != "sign-user-out"){
+        loadPage(page);
+        console.log("loading page " + page)
+      }
     });
   });
-
-  // Load the default page
-  loadPage("user-management");
 
   fetchAllData(db)
 });

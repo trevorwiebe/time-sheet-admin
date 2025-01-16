@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="build/css/styles.css">
 </head>
 <body>
-  <header>
+  <header id="main_header">
     <h1>Timesheet Admin Portal</h1>
     <nav>
       <ul class="menu">
@@ -16,16 +16,18 @@
         <li><a href="#" data-page="organization-details">Organization Details</a></li>
         <li><a href="#" data-page="employee-hours">Employee Hours</a></li>
         <li><a href="#" data-page="approve-time-off">Approve Time Off</a></li>
+        <li><a href="#" data-page="sign-user-out">Sign Out</a></li>
       </ul>
     </nav>
   </header>
   <main id="content">
     <!-- Content will load here dynamically -->
   </main>
-  <footer>
-    <p>&copy; 2025 Your Company</p>
+  <footer id="main_footer">
+    <p>&copy; Timesheet Admin Portal</p>
   </footer>
   <script src="build/js/main.js" type="module"></script>
+  <script src="build/js/auth.js" type="module"></script>
   <script src="build/js/components/user-management.js" type="module"></script>
   <script src="build/js/components/time-off-requests.js" type="module"></script>
   <script src="build/js/components/employee-hours.js" type="module"></script>
