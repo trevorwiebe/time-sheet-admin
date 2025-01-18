@@ -137,16 +137,15 @@ button:hover {
   padding: 5px;
   font-weight: bold;
 }
-/* .forgot-password {
-  text-align: center;
-  margin-top: 1rem;
+
+/* Organization Details */
+
+#day-selector{
+  padding: 20px;
+  margin: 10px;
+  font-size: 16px;
 }
 
-.forgot-password a {
-  color: var(--tiertiary);
-  text-decoration: none;
+#payperiod-value{
+  width: 5em;
 }
-
-.forgot-password a:hover {
-  text-decoration: underline;
-} */

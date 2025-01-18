@@ -8,12 +8,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (user) {
             // User is signed in, see docs for a list of available properties
             // https://firebase.google.com/docs/reference/js/auth.user
-            const uid = user.uid;
             onSignInSuccess(auth)
         } else {
             // User is signed out
             showSignInScreen(auth)
-            console.log("user is signed out")
         }
     });
 
@@ -47,7 +45,7 @@ function showSignInScreen(auth) {
         .then((userCredential) => {
             // Signed in 
             const user = userCredential.user;
-            console.log(user)
+            const userId = user.uid
         })
         .catch((error) => {
             const errorCode = error.code;
@@ -114,6 +112,5 @@ const signInHTML = `
         <p id="sign_in_error"></p>
         <button id="signin_button" type="submit">Sign In</button>
         </form>
-        </p>
     </div>
 `
