@@ -40,7 +40,7 @@ def process_folder(folder_path):
 
     return "\n".join(result)
 
-class CodeBaseProcessor:
+class CodeBaseProvider:
     def __init__(self, folder_path):
         self.folder_path = folder_path
         self.output = None

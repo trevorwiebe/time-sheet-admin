@@ -7,7 +7,7 @@ from rich.text import Text
 
 from atomic_agents.agents.base_agent import BaseAgent, BaseAgentConfig, BaseAgentInputSchema, BaseAgentOutputSchema
 from atomic_agents.lib.components.system_prompt_generator import SystemPromptGenerator
-from process_files import CodeBaseProcessor
+from agent.agent.code_base_provider import CodeBaseProcessor
 
 console = Console()
 
