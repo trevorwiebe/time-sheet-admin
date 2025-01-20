@@ -8,6 +8,7 @@ from rich.text import Text
 from atomic_agents.agents.base_agent import BaseAgent, BaseAgentConfig, BaseAgentInputSchema, BaseAgentOutputSchema
 from atomic_agents.lib.components.system_prompt_generator import SystemPromptGenerator
 from tools.code_base_provider import CodeBaseProvider
+from tools.get_code_changes import CodeChangesProvider
 
 console = Console()
 
@@ -15,6 +16,13 @@ API_KEY = os.getenv("API_KEY")
 client = instructor.from_openai(openai.OpenAI(api_key=API_KEY))
 
 agent = BaseAgent(
+    config=BaseAgentConfig(
+        client=client,
+        model="gpt-4o-mini"
+    )
+)
+
+commitMessageAgent = BaseAgent(
     config=BaseAgentConfig(
         client=client,
         model="gpt-4o-mini"
@@ -32,6 +40,12 @@ def getCodeBase():
     processor.run()
     return processor.output
 
+def getLastCodeChanges():
+    folder_path = '/Users/trevorwiebe/Documents/WebApps/timesheet'
+    changesProcessor = CodeChangesProvider(folder_path)
+    changesProcessor.run()
+    return changesProcessor.output
+
 def mainPrompt(code_base):
     return SystemPromptGenerator(
         background=[
@@ -46,13 +60,35 @@ def mainPrompt(code_base):
         output_instructions=["Your output should human readable with no added formatting characters."]
     )
 
+def commitMessageGenPrompt(changes):
+    return SystemPromptGenerator(
+        background=[
+            "You are a helpful programming assistant that generates clear commit message explaining what has changes in the code by looking at the output from 'git diff'.",
+            "The output from 'git diff' is between triple back ticks",
+            f"```{changes}```"
+        ],
+        steps=[
+            "Go through and look at which files have changes.",
+            "Create very short message about what has changes"
+        ],
+        output_instructions=["Your output should only contain letters, numbers and puctuation.  No additional formatting characters."]
+    )
+
 while True:
     user_input = console.input("You: ")
 
-    # get existing code base into a variable
-    code_base = getCodeBase()
-    system_prompt_generator_custom = mainPrompt(code_base=code_base)
-    agent.system_prompt_generator = system_prompt_generator_custom
+    if user_input == "gcc":
+        # generate a commit message based on changes
+        changes = getLastCodeChanges()
+        commit_message_prompt = commitMessageGenPrompt(changes=changes)
+        commitMessageAgent.system_prompt_generator = commit_message_prompt
+        commitMessageResponse = commitMessageAgent.run(BaseAgentInputSchema(chat_message="Please create a commit messages for me based on the code changes."))
+        console.print(Text(f"Commit Message Assistant:\n{commitMessageResponse.chat_message}", style="bold blue"))
+    else:
+        # get existing code base into a variable
+        code_base = getCodeBase()
+        system_prompt_generator_custom = mainPrompt(code_base=code_base)
+        agent.system_prompt_generator = system_prompt_generator_custom
 
-    response = agent.run(BaseAgentInputSchema(chat_message=user_input))
-    console.print(Text(f"Assistant:\n{response.chat_message}", style="bold green"))
+        response = agent.run(BaseAgentInputSchema(chat_message=user_input))
+        console.print(Text(f"Assistant:\n{response.chat_message}", style="bold green"))
