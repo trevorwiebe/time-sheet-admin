@@ -21,13 +21,6 @@ agent = BaseAgent(
     )
 )
 
-searchResultAgent = BaseAgent(
-    config=BaseAgentConfig(
-        client=client,
-        model="gpt-4o-mini"
-    )
-)
-
 initial_message = "Hello, how can I help you today?"
 agent.memory.add_message("assistant", content=BaseAgentOutputSchema(chat_message=initial_message))
 
@@ -37,7 +30,7 @@ def getCodeBase():
     folder_path = '/Users/trevorwiebe/Documents/WebApps/timesheet/build'
     processor = CodeBaseProvider(folder_path)
     processor.run()
-    code_base = processor.output
+    return processor.output
 
 def mainPrompt(code_base):
     return SystemPromptGenerator(
@@ -58,9 +51,7 @@ while True:
 
     # get existing code base into a variable
     code_base = getCodeBase()
-
     system_prompt_generator_custom = mainPrompt(code_base=code_base)
-
     agent.system_prompt_generator = system_prompt_generator_custom
 
     response = agent.run(BaseAgentInputSchema(chat_message=user_input))
