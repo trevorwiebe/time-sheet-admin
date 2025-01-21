@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // Function to load the page content
-async function loadPage(page, authentication, db) {
+async function loadPage(page, db) {
   const content = document.getElementById("content");
 
   // Load User Management screen
@@ -48,7 +48,7 @@ async function loadPage(page, authentication, db) {
     const response = await fetch("build/html/user-management.html");
     const html = await response.text();
     content.innerHTML = html;
-    loadUserManagement();
+    loadUserManagement(db);
   }
 
   // Load Organization Details screen

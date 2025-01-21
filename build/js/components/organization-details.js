@@ -1,4 +1,4 @@
-import { collection, addDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js"
+import { collection, addDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
 export function setupOrganizationForm(db) {
     const form = document.getElementById("org-form");

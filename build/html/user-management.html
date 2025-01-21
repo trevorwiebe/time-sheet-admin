@@ -19,7 +19,13 @@
     </div>
     <div class="form-group">
         <label for="admin-access">Admin Access</label>
-        <input type="checkbox" id="admin-access" name="admin-access">
+        <div class="checkbox-container">
+            <label for="admin-access" class="custom-checkbox">
+                <input type="checkbox" id="admin-access" name="admin-access">
+                <span class="checkmark"></span>
+                This user is an admin user.
+            </label>
+        </div>
     </div>
     <button id="user-form-btn" type="submit">Add User</button>
 </form>

@@ -138,6 +138,54 @@ button:hover {
   font-weight: bold;
 }
 
+/* User Management */
+.checkbox-container {
+  display: flex;
+  align-items: center; /* Center vertically */
+  margin-top: 0.5rem; /* Optional: Add some space above */
+}
+
+#admin-access{
+  width: 20px;
+  padding: 20px;
+}
+
+.custom-checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.custom-checkbox input {
+  display: none; /* Hide the default checkbox */
+}
+
+.checkmark {
+  width: 22px; /* Adjust width */
+  height: 25px; /* Adjust height */
+  border: 2px solid var(--tiertiary); /* Border color */
+  border-radius: 4px; /* Rounded corners */
+  margin-right: 10px; /* Space between checkbox and text */
+  display: inline-block;
+  position: relative;
+}
+
+.custom-checkbox input:checked + .checkmark {
+  background-color: var(--tiertiary); /* Background color when checked */
+}
+
+.custom-checkbox input:checked + .checkmark:after {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 3px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
 /* Organization Details */
 
 #day-selector{
