@@ -1,6 +1,23 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-import { getFirestore, getDocs, collection } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+import { 
+  getFirestore, 
+  setDoc, 
+  doc, 
+  collection, 
+  addDoc, 
+  connectFirestoreEmulator 
+} from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+import { 
+  getAuth, 
+  onAuthStateChanged, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut, 
+  connectAuthEmulator
+} from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js"
+import { getFunctions, httpsCallable, connectFunctionsEmulator } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-functions.js";
+
 import { loadUserManagement } from "./components/user-management.js";
 import { setupOrganizationForm } from "./components/organization-details.js";
 
@@ -22,6 +39,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+  const auth = getAuth();
+  const functions = getFunctions(app);
+
+  connectFirestoreEmulator(db, 'localhost', 8080);
+  connectAuthEmulator(auth, 'http://localhost:9099');
+  connectFunctionsEmulator(functions, 'localhost', 5001);
 
   const menuLinks = document.querySelectorAll(".menu a");
 
@@ -30,9 +53,25 @@ document.addEventListener("DOMContentLoaded", () => {
       event.preventDefault();
       const page = event.target.getAttribute("data-page");
       if(page != "sign-user-out"){
-        loadPage(page, db);
+        loadPage(page, 
+          db, 
+          auth, createUserWithEmailAndPassword,
+          doc, setDoc, addDoc, collection,
+          functions, httpsCallable
+        );
       }
     });
+  });
+
+  onAuthStateChanged(auth, (user) => {
+      if (user) {
+          // User is signed in, see docs for a list of available properties
+          // https://firebase.google.com/docs/reference/js/auth.user
+          onSignInSuccess(auth)
+      } else {
+          // User is signed out
+          showSignInScreen(auth)
+      }
   });
 
   // fetchAllData(db)
@@ -40,35 +79,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // Function to load the page content
-async function loadPage(page, db) {
+async function loadPage(
+  page, 
+  db, 
+  auth, createUserWithEmailAndPassword,
+  doc, setDoc, addDoc, collection,
+  functions, httpsCallable
+) {
   const content = document.getElementById("content");
 
   // Load User Management screen
   if (page === "user-management") {
-    const response = await fetch("build/html/user-management.html");
+    const response = await fetch("html/user-management.html");
     const html = await response.text();
     content.innerHTML = html;
-    loadUserManagement(db);
+    console.log(html)
+    loadUserManagement(
+      db, 
+      auth, createUserWithEmailAndPassword,
+      "orgId", 
+      doc, setDoc, 
+      functions, httpsCallable
+    );
   }
 
   // Load Organization Details screen
   if (page === "organization-details") {
-    const response = await fetch("build/html/organization-details.html");
+    const response = await fetch("html/organization-details.html");
     const html = await response.text();
     content.innerHTML = html
-    setupOrganizationForm(db);
+    setupOrganizationForm(db, addDoc, collection);
   }
 
   // Load Employee Hours screen
   if(page === "employee-hours"){
-    const response = await fetch("build/html/employee-hours.html");
+    const response = await fetch("html/employee-hours.html");
     const html = await response.text();
     content.innerHTML = html
   }
 
   // Load Approve Time Off screen
   if(page === "approve-time-off"){
-    const response = await fetch("build/html/approve-time-off.html");
+    const response = await fetch("html/approve-time-off.html");
     const html = await response.text();
     content.innerHTML = html
   }
@@ -83,3 +135,101 @@ async function loadPage(page, db) {
 
 //   return { users, organizations };
 // }
+
+function showSignInScreen(auth) {
+
+  // Hide header and footer
+  const header = document.getElementById("main_header");
+  header.style.display = "none"
+
+  const footer = document.getElementById("main_footer")
+  footer.style.display = "none"
+
+  // Show sign in box
+  const content = document.getElementById("content");
+  content.innerHTML = signInHTML
+
+  const form = document.getElementById('signin-form');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+
+  // Handle form submission
+  form.addEventListener('submit', async (event) => {
+      event.preventDefault(); // Prevent form from submitting the traditional way
+  
+      const email = emailInput.value;
+      const password = passwordInput.value;
+
+      signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+          // Signed in 
+          const user = userCredential.user;
+          const userId = user.uid
+      })
+      .catch((error) => {
+          const errorCode = error.code;
+          let errorMessage = "An error occurred. Please try again.";
+          switch (errorCode) {
+              case "auth/invalid-email":
+                  errorMessage = "Invalid email format.";
+                  break;
+              case "auth/wrong-password":
+                  errorMessage = "Incorrect password.";
+                  break;
+              case "auth/user-not-found":
+                  errorMessage = "No user found with that email.";
+                  break;
+              case "auth/invalid-credential":
+                  errorMessage = "Email or password is incorrect";
+                  break;
+            // Add more cases as needed
+          }
+
+          console.log(errorMessage)
+          document.getElementById("sign_in_error").innerHTML = errorMessage
+      });
+
+  });
+}
+
+function onSignInSuccess(auth){
+  const header = document.getElementById("main_header");
+  header.style.display = "block"
+
+  const footer = document.getElementById("main_footer")
+  footer.style.display = "block"
+
+  
+  const signInContainer = document.getElementById("signin-container")
+  if(signInContainer){
+      signInContainer.style.display = "none"
+  }
+
+  const signOutLink = document.querySelector('[data-page="sign-user-out"]');
+  signOutLink.addEventListener('click', (event) => {
+      event.preventDefault(); // Prevent the default anchor link behavior
+      signOut(auth).then(() => {
+          // Sign-out successful.
+      }).catch((error) => {
+          // An error happened.
+      });
+  });
+}
+
+const signInHTML = `
+    <div id="signin-container">
+        <h2>Sign In</h2>
+        <form id="signin-form">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+        </div>
+        <p id="sign_in_error"></p>
+        <button id="signin_button" type="submit">Sign In</button>
+        </form>
+    </div>
+`

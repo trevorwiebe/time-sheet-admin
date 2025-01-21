@@ -1,8 +1,13 @@
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
-import { setDoc, doc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
-export function loadUserManagement(db, organizationId) {
-  const auth = getAuth()
+export function loadUserManagement(
+  db, 
+  auth, createUserWithEmailAndPassword,
+  organizationId, 
+  doc, setDoc,
+  functions, httpsCallable
+) {
+  
+  console.log("userManagement")
   const form = document.getElementById("user-form");
   if (form) {
     form.addEventListener("submit", (event) => {
@@ -15,7 +20,12 @@ export function loadUserManagement(db, organizationId) {
       const adminAccess = document.getElementById("admin-access").checked;
 
       // Call a function to handle adding the user (you'll need to implement this)
-      addNewUser(db, auth, name, email, tempPassword, hireDate, organizationId, adminAccess);
+      addNewUser(
+        db, auth, 
+        name, email, tempPassword, hireDate, organizationId, adminAccess,
+        doc, setDoc, createUserWithEmailAndPassword,
+        functions, httpsCallable
+      );
     });
   }
 }
@@ -28,34 +38,44 @@ function addNewUser(
   tempPassword,
   hireDate,
   organizationId,
-  adminAccess
+  adminAccess,
+  doc,
+  setDoc,
+  createUserWithEmailAndPassword,
+  functions,
+  httpsCallable
 ) {
   createUserWithEmailAndPassword(auth, email, tempPassword)
-  .then((userCredential) => {
-    // User is successfully created
-    const user = userCredential.user;
-    return user.uid
-  })
-  .then((userId) => {
-    // Now we need to save the user in firestare
-    const user = {
-      name: name,
-      email: email,
-      availablePTO: 0,
-      hireDate: hireDate,
-      organizationId: organizationId,
-      adminAccess: adminAccess
-    }
-    saveUserInDB(db, user, userId)
-  })
-  .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    console.log(errorMessage)
-  });
+    .then((userCredential) => {
+      const user = userCredential.user;
+      // Set custom claims
+      const setClaims = httpsCallable(functions, 'setCustomClaims');
+      console.log(user.uid)
+      console.log(organizationId)
+      return setClaims({ uid: user.uid, organizationId: organizationId });
+    })
+    .then((successData) => {
+      // Now we need to save the user in Firestore
+      const userId = successData.data.uid;
+      const organizationId = successData.data.organizationId
+      const user = {
+          name: name,
+          email: email,
+          availablePTO: 0,
+          hireDate: hireDate,
+          organizationId: organizationId,
+          adminAccess: adminAccess
+      };
+      return saveUserInDB(db, user, userId, doc, setDoc);
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log(errorMessage)
+    });
 }
 
-async function saveUserInDB(db, user, userId){
+async function saveUserInDB(db, user, userId, doc, setDoc){
   const orgId = user.organizationId;
   try {
     // Create a reference to the document using the userId

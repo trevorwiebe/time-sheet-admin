@@ -1,6 +1,6 @@
-import { collection, addDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
-export function setupOrganizationForm(db) {
+export function setupOrganizationForm(db, addDoc, collection) {
+    
     const form = document.getElementById("org-form");
     const name = document.getElementById("org-name-field");
     const payPeriodDOWStart = document.getElementById("day-selector");
@@ -16,12 +16,12 @@ export function setupOrganizationForm(db) {
                 payperiodUnit: payperiodUnit.value
             };
 
-            await updateOrg(db, org);
+            await updateOrg(db, addDoc, collection, org);
         });
     }
 }
 
-async function updateOrg(db, org){
+async function updateOrg(db, addDoc, collection, org){
     try {
         const docRef = await addDoc(collection(db, "organizations"), org);
         console.log("Document written with ID: ", docRef.id);
