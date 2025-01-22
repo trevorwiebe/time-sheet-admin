@@ -21,6 +21,8 @@ import { getFunctions, httpsCallable, connectFunctionsEmulator } from "https://w
 import { loadUserManagement } from "./components/user-management.js";
 import { setupOrganizationForm } from "./components/organization-details.js";
 
+let userOrgId = "";
+
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -65,9 +67,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   onAuthStateChanged(auth, (user) => {
       if (user) {
-          // User is signed in, see docs for a list of available properties
-          // https://firebase.google.com/docs/reference/js/auth.user
-          onSignInSuccess(auth)
+        onSignInSuccess(auth)
+        // Get the ID token result to access custom claims
+        user.getIdTokenResult().then((idTokenResult) => {
+          // Access the custom claims
+          userOrgId = idTokenResult.claims.organizationId;
+
+        }).catch((error) => {
+            console.error('Error fetching custom claims:', error);
+        });
       } else {
           // User is signed out
           showSignInScreen(auth)
@@ -93,11 +101,10 @@ async function loadPage(
     const response = await fetch("html/user-management.html");
     const html = await response.text();
     content.innerHTML = html;
-    console.log(html)
     loadUserManagement(
       db, 
       auth, createUserWithEmailAndPassword,
-      "BhiF3KsjuPApO7Cy0rvd", 
+      userOrgId, 
       doc, setDoc, 
       functions, httpsCallable
     );

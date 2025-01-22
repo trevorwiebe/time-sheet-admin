@@ -6,9 +6,7 @@ export function loadUserManagement(
   doc, setDoc,
   functions, httpsCallable
 ) {
-  
-  console.log("userManagement")
-  const form = document.getElementById("user-form");
+    const form = document.getElementById("user-form");
   if (form) {
     form.addEventListener("submit", (event) => {
       event.preventDefault(); // Prevent the default form submission
