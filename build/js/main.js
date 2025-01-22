@@ -4,6 +4,7 @@ import {
   getFirestore, 
   setDoc, 
   doc, 
+  getDoc, getDocs,
   collection, 
   addDoc, 
   connectFirestoreEmulator 
@@ -21,7 +22,9 @@ import { getFunctions, httpsCallable, connectFunctionsEmulator } from "https://w
 import { loadUserManagement } from "./components/user-management.js";
 import { setupOrganizationForm } from "./components/organization-details.js";
 
-let userOrgId = "";
+let mUserOrgId = "";
+let mOrganization = "";
+let mUsers = "";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -65,24 +68,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  onAuthStateChanged(auth, (user) => {
-      if (user) {
-        onSignInSuccess(auth)
-        // Get the ID token result to access custom claims
-        user.getIdTokenResult().then((idTokenResult) => {
-          // Access the custom claims
-          userOrgId = idTokenResult.claims.organizationId;
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      onSignInSuccess(auth);
+      // Get the ID token result to access custom claims
+      const idTokenResult = await user.getIdTokenResult();
+      // Access the custom claims
+      mUserOrgId = idTokenResult.claims.organizationId;
 
-        }).catch((error) => {
-            console.error('Error fetching custom claims:', error);
-        });
-      } else {
-          // User is signed out
-          showSignInScreen(auth)
-      }
+      // Fetch organization and users
+      await fetchAllData(db, mUserOrgId, getDoc, getDocs);
+    } else {
+      // User is signed out
+      showSignInScreen(auth);
+    }
   });
-
-  // fetchAllData(db)
 });
 
 
@@ -104,7 +104,7 @@ async function loadPage(
     loadUserManagement(
       db, 
       auth, createUserWithEmailAndPassword,
-      userOrgId, 
+      mUserOrgId, 
       doc, setDoc, 
       functions, httpsCallable
     );
@@ -133,15 +133,21 @@ async function loadPage(
   }
 }
 
-// async function fetchAllData(db) {
-//   const usersSnapshot = await getDocs(collection(db, "users"));
-//   const users = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+async function fetchAllData(db, organizationId, getDoc, getDocs) {
+  try {
+      // Fetch the organization data
+      const orgDocRef = doc(db, `organizations/${organizationId}`);
+      const orgDoc = await getDoc(orgDocRef);
+      mOrganization = orgDoc.exists() ? { id: orgDoc.id, ...orgDoc.data() } : null;
 
-//   const orgSnapshot = await getDocs(collection(db, "organizations"));
-//   const organizations = orgSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-
-//   return { users, organizations };
-// }
+      // Fetch the users for the organization
+      const usersSnapshot = await getDocs(collection(db, `organizations/${organizationId}/users`));
+      mUsers = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+      console.error('Error fetching organization and users:', error);
+      return { organization: null, users: [] }; // Return default values on error
+  }
+}
 
 function showSignInScreen(auth) {
 
