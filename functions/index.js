@@ -11,8 +11,8 @@ exports.setCustomClaims = functions.https.onCall(async (data, context) => {
     try {
         // Set custom claims
         await admin.auth().setCustomUserClaims(uid, { organizationId: organizationId });
-        console.log("Success")
-        return { "uid": uid, "organizationId": organizationId };
+        const result = { "uid": uid, "organizationId": organizationId };
+        return result
     } catch (error) {
         console.error('Error setting custom claims:', error);
         throw new functions.https.HttpsError('internal', 'Unable to set custom claims.');

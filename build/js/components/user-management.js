@@ -50,8 +50,6 @@ function addNewUser(
       const user = userCredential.user;
       // Set custom claims
       const setClaims = httpsCallable(functions, 'setCustomClaims');
-      console.log(user.uid)
-      console.log(organizationId)
       return setClaims({ uid: user.uid, organizationId: organizationId });
     })
     .then((successData) => {
@@ -66,7 +64,7 @@ function addNewUser(
           organizationId: organizationId,
           adminAccess: adminAccess
       };
-      return saveUserInDB(db, user, userId, doc, setDoc);
+      return saveUserInDB(db, user, userId, organizationId, doc, setDoc);
     })
     .catch((error) => {
       const errorCode = error.code;
@@ -75,11 +73,10 @@ function addNewUser(
     });
 }
 
-async function saveUserInDB(db, user, userId, doc, setDoc){
-  const orgId = user.organizationId;
+async function saveUserInDB(db, user, userId, organizationId, doc, setDoc){
   try {
     // Create a reference to the document using the userId
-    const userDocRef = doc(db, `organizations/${orgId}/users/${userId}`);
+    const userDocRef = doc(db, `organizations/${organizationId}/users/${userId}`);
     // Use setDoc to save the user data under the userId
     await setDoc(userDocRef, user);
     console.log("User saved with Id: ", userId);
