@@ -104,7 +104,7 @@ async function loadPage(
     loadUserManagement(
       db, 
       auth, createUserWithEmailAndPassword,
-      mUserOrgId, 
+      mUserOrgId, mUsers,
       doc, setDoc,
       functions, httpsCallable
     );
@@ -134,6 +134,9 @@ async function loadPage(
 }
 
 async function fetchAllData(db, organizationId, getDoc, getDocs) {
+
+  console.log(organizationId);
+
   try {
       // Fetch the organization data
       const orgDocRef = doc(db, `organizations/${organizationId}`);
@@ -143,6 +146,7 @@ async function fetchAllData(db, organizationId, getDoc, getDocs) {
       // Fetch the users for the organization
       const usersSnapshot = await getDocs(collection(db, `organizations/${organizationId}/users`));
       mUsers = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      console.log(mUsers);
   } catch (error) {
       console.error('Error fetching organization and users:', error);
       return { organization: null, users: [] }; // Return default values on error

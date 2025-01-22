@@ -1,31 +1,42 @@
 <h2>User Management</h2>
 <p>Manage users, add new users, and update user details.</p>
-<form id="user-form">
-    <div class="form-group">
-        <label for="user-name">Name</label>
-        <input type="text" id="user-name" name="user-name" placeholder="Enter user's name" required>
+
+<div id="user_container">
+    <div id="user_box">
+        <h2>Add new user</h2>
+        <form id="user-form">
+            <div class="form-group">
+                <label for="user-name">Name</label>
+                <input type="text" id="user-name" name="user-name" placeholder="Enter user's name" required>
+            </div>
+            <div class="form-group">
+                <label for="user-email">Email</label>
+                <input type="email" id="user-email" name="user-email" placeholder="Enter user email" required>
+            </div>
+            <div class="form-group">
+                <label for="temp-password">Temporary Password</label>
+                <input type="password" id="temp-password" name="temp-password" placeholder="Enter temporary password" required>
+            </div>
+            <div class="form-group">
+                <label for="hire-date">Hire Date</label>
+                <input type="date" id="hire-date" name="hire-date" required>
+            </div>
+            <div class="form-group">
+                <label for="admin-access">Admin Access</label>
+                <div class="checkbox-container">
+                    <label for="admin-access" class="custom-checkbox">
+                        <input type="checkbox" id="admin-access" name="admin-access">
+                        <span class="checkmark"></span>
+                        This user is an admin user.
+                    </label>
+                </div>
+            </div>
+            <button id="user-form-btn" type="submit">Save User</button>
+        </form>
     </div>
-    <div class="form-group">
-        <label for="user-email">Email</label>
-        <input type="email" id="user-email" name="user-email" placeholder="Enter user email" required>
+    
+    <div id="user_box">
+        <h2>Current Users</h2>
+        <ul id="user-list"></ul>
     </div>
-    <div class="form-group">
-        <label for="temp-password">Temporary Password</label>
-        <input type="password" id="temp-password" name="temp-password" placeholder="Enter temporary password" required>
-    </div>
-    <div class="form-group">
-        <label for="hire-date">Hire Date</label>
-        <input type="date" id="hire-date" name="hire-date" required>
-    </div>
-    <div class="form-group">
-        <label for="admin-access">Admin Access</label>
-        <div class="checkbox-container">
-            <label for="admin-access" class="custom-checkbox">
-                <input type="checkbox" id="admin-access" name="admin-access">
-                <span class="checkmark"></span>
-                This user is an admin user.
-            </label>
-        </div>
-    </div>
-    <button id="user-form-btn" type="submit">Add User</button>
-</form>
+</div>

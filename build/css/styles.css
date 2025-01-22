@@ -15,6 +15,7 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
+  width: 100%;
 }
 
 header {
@@ -79,6 +80,7 @@ footer {
 main {
   padding: 2rem;
   text-align: center;
+  width: 100%;
 }
 
 /* Sign In box */
@@ -186,8 +188,36 @@ button:hover {
   transform: rotate(45deg);
 }
 
-/* Organization Details */
+#user_container{
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
 
+#user_box{
+  width: 45%;
+}
+
+.user-list-item {
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  list-style-type: none;
+  transition: background-color 0.2s;
+}
+
+.user-list-item:hover {
+  background-color: #f4f4f4;
+}
+
+#user-list{
+  margin-top: 60px;
+}
+
+/* Organization Details */
 #day-selector{
   padding: 20px;
   margin: 10px;
@@ -196,4 +226,54 @@ button:hover {
 
 #payperiod-value{
   width: 5em;
+}
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+  main{
+    width: 100%;
+  }
+  #user_box{
+    width: 100%;
+  }
+}
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+@media only screen and (min-width: 600px) {
+  main{
+    width: 100%;
+  }
+  #user_box{
+    width: 100%;
+  }
+}
+
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (min-width: 768px) {
+  main{
+    width: 80%;
+  }
+  #user_box{
+    width: 45%;
+  }
+}
+
+/* Large devices (laptops/desktops, 992px and up) */
+@media only screen and (min-width: 992px) {
+  main{
+    width: 70%;
+  }
+  #user_box{
+    width: 45%;
+  }
+}
+
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+@media only screen and (min-width: 1200px) {
+  main{
+    width: 60%;
+  }
+  #user_box{
+    width: 45%;
+  }
 }

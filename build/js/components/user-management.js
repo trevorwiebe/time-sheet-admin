@@ -2,11 +2,24 @@
 export function loadUserManagement(
   db, 
   auth, createUserWithEmailAndPassword,
-  organizationId, 
+  organizationId, usersList,
   doc, setDoc,
   functions, httpsCallable
 ) {
-    const form = document.getElementById("user-form");
+  const form = document.getElementById("user-form");
+  const userList = document.getElementById("user-list");
+
+  // Function to render the user list
+  function renderUserList(users) {
+    userList.innerHTML = ''; // Clear existing list
+    users.forEach(user => {
+        const listItem = createUserListItem(user)
+        userList.appendChild(listItem);
+    });
+  }
+
+  renderUserList(usersList)
+
   if (form) {
     form.addEventListener("submit", (event) => {
       event.preventDefault(); // Prevent the default form submission
@@ -53,7 +66,6 @@ function addNewUser(
     .then((successData) => {
       // Now we need to save the user in Firestore
       const userId = successData.data.uid;
-      const organizationId = successData.data.organizationId
       const user = {
           name: name,
           email: email,
@@ -76,9 +88,25 @@ async function saveUserInDB(db, user, userId, organizationId, doc, setDoc){
     // Create a reference to the document using the userId
     const userDocRef = doc(db, `organizations/${organizationId}/users/${userId}`);
     // Use setDoc to save the user data under the userId
-    await setDoc(userDocRef, user);
+    const savedUser = await setDoc(userDocRef, user);
+    console.log(user)
     console.log("User saved with Id: ", userId);
   } catch (e) {
     console.error("Error adding user: ", e);
   }
+}
+
+function createUserListItem(user) {
+  const listItem = document.createElement('li');
+  listItem.textContent = `${user.name} \n\n(${user.email})`; // Customize the display text
+  listItem.classList.add('user-list-item'); // Add a class for styling
+
+  // Add a click event listener
+  listItem.addEventListener('click', () => {
+      // Handle the click event (e.g., show user details or edit user)
+      console.log(`User clicked: ${user.name}`);
+      // You can add more functionality here, like opening a modal or navigating to a user detail page.
+  });
+
+  return listItem;
 }
