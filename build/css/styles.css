@@ -66,7 +66,7 @@ nav {
 .menu a:hover {
   transition: 0.2s;
   background-color: var(--secondary);
-  border-radius: 5px;
+  border-radius: 6px;
   color: white;
 }
 
@@ -83,11 +83,19 @@ main {
   width: 100%;
 }
 
+.custom-selector{
+  padding: 13px;
+  border-radius: 6px;
+  /* this is necesarry for safari */
+  line-height: 18px;
+  -webkit-appearance: initial;
+}
+
 /* Sign In box */
 #signin-container {
   background-color: white;
   padding: 2rem;
-  border-radius: 8px;
+  border-radius: 6px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 400px;
@@ -113,7 +121,7 @@ input {
   padding: 0.8rem 0rem 0.8rem 0rem;
   margin-top: 0.2rem;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 1rem;
 }
 
@@ -123,7 +131,7 @@ button {
   background-color: var(--tiertiary);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 1rem;
   cursor: pointer;
 }
@@ -166,7 +174,7 @@ button:hover {
   width: 22px; /* Adjust width */
   height: 25px; /* Adjust height */
   border: 2px solid var(--tiertiary); /* Border color */
-  border-radius: 4px; /* Rounded corners */
+  border-radius: 6px; /* Rounded corners */
   margin-right: 10px; /* Space between checkbox and text */
   display: inline-block;
   position: relative;
@@ -203,7 +211,7 @@ button:hover {
   padding: 10px;
   margin: 5px 0;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   list-style-type: none;
   transition: background-color 0.2s;
@@ -218,11 +226,6 @@ button:hover {
 }
 
 /* Organization Details */
-#day-selector{
-  padding: 20px;
-  margin: 10px;
-  font-size: 16px;
-}
 
 #payperiod-value{
   width: 5em;
