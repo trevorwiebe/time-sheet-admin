@@ -76,8 +76,10 @@ document.addEventListener("DOMContentLoaded", () => {
       // Access the custom claims
       mUserOrgId = idTokenResult.claims.organizationId;
 
-      // Fetch organization and users
-      await fetchAllData(db, mUserOrgId, getDoc, getDocs);
+      if(mUserOrgId != null){
+        // Fetch organization and users
+        await fetchAllData(db, mUserOrgId, getDoc, getDocs);
+      }
 
       loadPage("user-management", db, 
         auth, createUserWithEmailAndPassword,
@@ -104,6 +106,7 @@ async function loadPage(
 
   // Load User Management screen
   if (page === "user-management") {
+
     const response = await fetch("html/user-management.html");
     const html = await response.text();
     content.innerHTML = html;
@@ -112,7 +115,8 @@ async function loadPage(
       auth, createUserWithEmailAndPassword,
       mUserOrgId, mUsers,
       doc, setDoc,
-      functions, httpsCallable
+      functions, httpsCallable,
+      updateUserList
     );
   }
 
@@ -242,6 +246,17 @@ function onSignInSuccess(auth){
           // An error happened.
       });
   });
+}
+
+function updateUserList(updatedUser){
+  const existingUserIndex = mUsers.findIndex(user => user.id === updatedUser.id);
+  if (existingUserIndex !== -1) {
+      // Update existing user
+      mUsers[existingUserIndex] = updatedUser;
+  } else {
+      // Add new user
+      mUsers.push(updatedUser);
+  }
 }
 
 const signInHTML = `

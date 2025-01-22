@@ -4,7 +4,8 @@ export function loadUserManagement(
   auth, createUserWithEmailAndPassword,
   organizationId, usersList,
   doc, setDoc,
-  functions, httpsCallable
+  functions, httpsCallable,
+  updateUserCallback
 ) {
   const form = document.getElementById("user-form");
   const userList = document.getElementById("user-list");
@@ -35,7 +36,7 @@ export function loadUserManagement(
         db, auth, 
         name, email, tempPassword, hireDate, organizationId, adminAccess,
         doc, setDoc, createUserWithEmailAndPassword,
-        functions, httpsCallable
+        functions, httpsCallable, updateUserCallback
       );
     });
   }
@@ -54,7 +55,8 @@ function addNewUser(
   setDoc,
   createUserWithEmailAndPassword,
   functions,
-  httpsCallable
+  httpsCallable,
+  updateUserCallback
 ) {
   createUserWithEmailAndPassword(auth, email, tempPassword)
     .then((userCredential) => {
@@ -76,6 +78,13 @@ function addNewUser(
       };
       return saveUserInDB(db, user, userId, organizationId, doc, setDoc);
     })
+    .then((newUser) => {
+      updateUserCallback(newUser)
+
+      const userList = document.getElementById("user-list");
+      const listItem = createUserListItem(newUser)
+      userList.appendChild(listItem);
+    })
     .catch((error) => {
       const errorCode = error.code;
       const errorMessage = error.message;
@@ -88,9 +97,8 @@ async function saveUserInDB(db, user, userId, organizationId, doc, setDoc){
     // Create a reference to the document using the userId
     const userDocRef = doc(db, `organizations/${organizationId}/users/${userId}`);
     // Use setDoc to save the user data under the userId
-    const savedUser = await setDoc(userDocRef, user);
-    console.log(user)
-    console.log("User saved with Id: ", userId);
+    await setDoc(userDocRef, user);
+    return user
   } catch (e) {
     console.error("Error adding user: ", e);
   }
