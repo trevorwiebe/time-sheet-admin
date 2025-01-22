@@ -118,10 +118,15 @@ async function loadPage(
 
   // Load Organization Details screen
   if (page === "organization-details") {
+
+    function updateOrganizationData(updatedOrg) {
+      mOrganization = updatedOrg;
+    }
+
     const response = await fetch("html/organization-details.html");
     const html = await response.text();
     content.innerHTML = html
-    setupOrganizationForm(db, addDoc, doc, getDoc, setDoc, collection, mOrganization);
+    setupOrganizationForm(db, addDoc, doc, getDoc, setDoc, collection, mOrganization, updateOrganizationData);
   }
 
   // Load Employee Hours screen

@@ -1,5 +1,5 @@
 
-export function setupOrganizationForm(db, addDoc, doc, getDoc, setDoc, collection, org) {
+export function setupOrganizationForm(db, addDoc, doc, getDoc, setDoc, collection, org, updateCallback) {
     
     const form = document.getElementById("org-form");
     const name = document.getElementById("org-name-field");
@@ -24,6 +24,8 @@ export function setupOrganizationForm(db, addDoc, doc, getDoc, setDoc, collectio
             };
 
             await updateOrg(db, addDoc, doc, getDoc, setDoc, collection, newOrg);
+
+            updateCallback(newOrg)
         });
     }
 }
@@ -40,6 +42,12 @@ async function updateOrg(db, addDoc, doc, getDoc, setDoc, collection, org) {
             // Add a new organization
             await addDoc(collection(db, 'organizations'), org);
         }
+
+        document.getElementById("update_success_box").style.display = "block";
+        document.getElementById("message").innerHTML = "Organization saved successfully"
+
+        console.log(org)
+
     } catch (e) {
         console.error('Error adding or updating organization:', e);
     }
