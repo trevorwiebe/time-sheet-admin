@@ -15,7 +15,13 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut, 
-  connectAuthEmulator
+  connectAuthEmulator,
+  updateProfile,
+  updateEmail,
+  sendEmailVerification,
+  updatePassword,
+  sendPasswordResetEmail,
+  deleteUser
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js"
 import { getFunctions, httpsCallable, connectFunctionsEmulator } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-functions.js";
 
@@ -60,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if(page != "sign-user-out"){
         loadPage(page, 
           db, 
-          auth, createUserWithEmailAndPassword,
+          auth, createUserWithEmailAndPassword, updateProfile, updateEmail, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
           doc, setDoc, getDoc, addDoc, collection,
           functions, httpsCallable
         );
@@ -79,10 +85,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if(mUserOrgId != null){
         // Fetch organization and users
         await fetchAllData(db, mUserOrgId, getDoc, getDocs);
+      }else{
+        console.log("User credential is null");
       }
 
       loadPage("user-management", db, 
-        auth, createUserWithEmailAndPassword,
+        auth, createUserWithEmailAndPassword, updateProfile, updateEmail, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
         doc, setDoc, getDoc, addDoc, collection,
         functions, httpsCallable
       );
@@ -98,7 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
 async function loadPage(
   page, 
   db, 
-  auth, createUserWithEmailAndPassword,
+  auth, createUserWithEmailAndPassword, updateProfile, updateEmail, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
   doc, setDoc, getDoc, addDoc, collection,
   functions, httpsCallable
 ) {
@@ -112,7 +120,7 @@ async function loadPage(
     content.innerHTML = html;
     loadUserManagement(
       db, 
-      auth, createUserWithEmailAndPassword,
+      auth, createUserWithEmailAndPassword, updateProfile, updateEmail, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
       mUserOrgId, mUsers,
       doc, setDoc,
       functions, httpsCallable,
@@ -150,8 +158,6 @@ async function loadPage(
 
 async function fetchAllData(db, organizationId, getDoc, getDocs) {
 
-  console.log(organizationId);
-
   try {
       // Fetch the organization data
       const orgDocRef = doc(db, `organizations/${organizationId}`);
@@ -161,7 +167,6 @@ async function fetchAllData(db, organizationId, getDoc, getDocs) {
       // Fetch the users for the organization
       const usersSnapshot = await getDocs(collection(db, `organizations/${organizationId}/users`));
       mUsers = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      console.log(mUsers);
   } catch (error) {
       console.error('Error fetching organization and users:', error);
       return { organization: null, users: [] }; // Return default values on error

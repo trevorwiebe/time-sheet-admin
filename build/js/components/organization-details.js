@@ -7,14 +7,14 @@ export function setupOrganizationForm(db, addDoc, doc, getDoc, setDoc, collectio
     const payPeriodDuration = document.getElementById("payperiod-value");
     const payperiodUnit = document.getElementById("unit-selector");
 
-    name.value = org.name
-    payPeriodDOWStart.value = org.payPeriodDOWStart
-    payPeriodDuration.value = org.payPeriodDuration
-    payperiodUnit.value = org.payperiodUnit
+    name.value = org.name || "";
+    payPeriodDOWStart.value = org.payPeriodDOWStart || "Monday";
+    payPeriodDuration.value = org.payPeriodDuration || "2";
+    payperiodUnit.value = org.payperiodUnit || "week";
 
     if (form) {
         form.addEventListener("submit", async (event) => {
-        event.preventDefault();
+            event.preventDefault();
             const newOrg = {
                 id: org.id,
                 name: name.value,
@@ -32,22 +32,25 @@ export function setupOrganizationForm(db, addDoc, doc, getDoc, setDoc, collectio
 
 async function updateOrg(db, addDoc, doc, getDoc, setDoc, collection, org) {
     try {
-        const orgDocRef = doc(db, `organizations/${org.id}`);
-        const orgDoc = await getDoc(orgDocRef);
-
-        if (orgDoc.exists()) {
-            // Update the existing organization
-            await setDoc(orgDocRef, org);
-        } else {
+        if(org.id == undefined){
+            delete org.id;
             // Add a new organization
             await addDoc(collection(db, 'organizations'), org);
+        }else{
+            const orgDocRef = doc(db, `organizations/${org.id}`);
+            const orgDoc = await getDoc(orgDocRef);
+    
+            if (orgDoc.exists()) {
+                // Update the existing organization
+                await setDoc(orgDocRef, org);
+            } else {
+                // Add a new organization
+                await addDoc(collection(db, 'organizations'), org);
+            }
         }
 
-        document.getElementById("update_success_box").style.display = "block";
+        document.getElementById("update_success_box").style.visibility = "visible";
         document.getElementById("message").innerHTML = "Organization saved successfully"
-
-        console.log(org)
-
     } catch (e) {
         console.error('Error adding or updating organization:', e);
     }

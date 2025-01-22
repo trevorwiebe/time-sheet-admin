@@ -1,28 +1,34 @@
 
 export function loadUserManagement(
   db, 
-  auth, createUserWithEmailAndPassword,
+  auth, createUserWithEmailAndPassword, updateProfile, updateEmail, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
   organizationId, usersList,
   doc, setDoc,
   functions, httpsCallable,
-  updateUserCallback
+  updateUserCallback, updateUser
 ) {
   const form = document.getElementById("user-form");
   const userList = document.getElementById("user-list");
 
   // Function to render the user list
   function renderUserList(users) {
+    const emptyListNote = document.getElementById("empty_user_list");
     userList.innerHTML = ''; // Clear existing list
-    users.forEach(user => {
-        const listItem = createUserListItem(user)
-        userList.appendChild(listItem);
-    });
+    if(users.length !== 0){
+      users.forEach(user => {
+          const listItem = createUserListItem(user, db, doc, setDoc, auth, updateEmail)
+          userList.appendChild(listItem);
+      });
+      emptyListNote.style.display = "none";
+    }else{
+      emptyListNote.style.display = "block";
+    }
   }
 
   renderUserList(usersList)
 
   if (form) {
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
       event.preventDefault(); // Prevent the default form submission
 
       const name = document.getElementById("user-name").value
@@ -36,7 +42,7 @@ export function loadUserManagement(
         db, auth, 
         name, email, tempPassword, hireDate, organizationId, adminAccess,
         doc, setDoc, createUserWithEmailAndPassword,
-        functions, httpsCallable, updateUserCallback
+        functions, httpsCallable, updateUserCallback, updateUser
       );
     });
   }
@@ -46,14 +52,19 @@ export function loadUserManagement(
 
   window.addEventListener("click", (event) => {
     // Check if the click was outside the dialog
-    if (editUserDialog && !editUserDialog.contains(event.target) && !Array.from(userListItems).includes(event.target)) {
+    if (
+      editUserDialog && 
+      !editUserDialog.contains(event.target) && 
+      !Array.from(userListItems).includes(event.target) &&
+      event.target.id != "edit-user-form-btn"
+    ) {
       editUserDialog.style.display = "none"; // Close the dialog
     }
   });
 
 }
 
-function addNewUser(
+async function addNewUser(
   db,
   auth, 
   name,
@@ -67,7 +78,8 @@ function addNewUser(
   createUserWithEmailAndPassword,
   functions,
   httpsCallable,
-  updateUserCallback
+  updateUserCallback,
+  updateEmail
 ) {
   createUserWithEmailAndPassword(auth, email, tempPassword)
     .then((userCredential) => {
@@ -93,8 +105,9 @@ function addNewUser(
       updateUserCallback(newUser)
 
       const userList = document.getElementById("user-list");
-      const listItem = createUserListItem(newUser)
+      const listItem = createUserListItem(newUser, db, doc, setDoc, auth, updateEmail);
       userList.appendChild(listItem);
+      document.getElementById("empty_user_list").style.display = "none";
     })
     .catch((error) => {
       const errorCode = error.code;
@@ -115,16 +128,60 @@ async function saveUserInDB(db, user, userId, organizationId, doc, setDoc){
   }
 }
 
-function createUserListItem(user) {
+function createUserListItem(user, db, doc, setDoc, auth, updateEmail) {
   const listItem = document.createElement('li');
   listItem.textContent = `${user.name} \n\n(${user.email})`; // Customize the display text
   listItem.classList.add('user-list-item'); // Add a class for styling
 
   // Add a click event listener
   listItem.addEventListener('click', () => {
-      // Handle the click event (e.g., show user details or edit user)
-      const editUserDialog = document.getElementById("edit_user_box");
-      editUserDialog.style.display = "block";
+    // Handle the click event (e.g., show user details or edit user)
+    const editUserDialog = document.getElementById("edit_user_box");
+    editUserDialog.style.display = "block";
+
+    const name = document.getElementById("edit-user-name");
+    const email = document.getElementById("edit-user-email");
+    const hireDate = document.getElementById("edit-hire-date");
+    const adminAccess = document.getElementById("edit-admin-access");
+    const updateBtn = document.getElementById("edit-user-form-btn");
+
+    name.value = user.name;
+    email.value = user.email;
+    hireDate.value = user.hireDate;
+    adminAccess.checked = user.adminAccess;
+
+    updateBtn.addEventListener('click', async (e) => {
+
+      e.preventDefault();
+
+      const newUser = {
+        id: user.id,
+        name: name.value,
+        email: email.value,
+        hireDate: hireDate.value,
+        adminAccess: adminAccess.checked,
+        organizationId: user.organizationId
+      }
+
+      // Update user in Firebase Auth
+      const userRef = doc(db, `organizations/${user.organizationId}/users/${user.id}`);
+      await setDoc(userRef, newUser);
+
+      // Update user in Firebase Auth
+      const authUserRef = auth.currentUser;
+      if (authUserRef) {
+          // Update the user's email
+          const userCredential = await updateEmail(authUserRef, email.value);
+          
+          // Optionally, you can handle the response or errors here
+          console.log('User updated successfully:', userCredential);
+          // location.reload();
+      } else {
+          throw new Error('No user is currently signed in.');
+      }
+
+    })
+
   });
 
   return listItem;
