@@ -1,31 +1,46 @@
 
-export function setupOrganizationForm(db, addDoc, collection) {
+export function setupOrganizationForm(db, addDoc, doc, getDoc, setDoc, collection, org) {
     
     const form = document.getElementById("org-form");
     const name = document.getElementById("org-name-field");
     const payPeriodDOWStart = document.getElementById("day-selector");
     const payPeriodDuration = document.getElementById("payperiod-value");
     const payperiodUnit = document.getElementById("unit-selector");
+
+    name.value = org.name
+    payPeriodDOWStart.value = org.payPeriodDOWStart
+    payPeriodDuration.value = org.payPeriodDuration
+    payperiodUnit.value = org.payperiodUnit
+
     if (form) {
         form.addEventListener("submit", async (event) => {
         event.preventDefault();
-            const org = {
+            const newOrg = {
+                id: org.id,
                 name: name.value,
                 payPeriodDOWStart: payPeriodDOWStart.value,
                 payPeriodDuration: payPeriodDuration.value,
                 payperiodUnit: payperiodUnit.value
             };
 
-            await updateOrg(db, addDoc, collection, org);
+            await updateOrg(db, addDoc, doc, getDoc, setDoc, collection, newOrg);
         });
     }
 }
 
-async function updateOrg(db, addDoc, collection, org){
+async function updateOrg(db, addDoc, doc, getDoc, setDoc, collection, org) {
     try {
-        const docRef = await addDoc(collection(db, "organizations"), org);
-        console.log("Document written with ID: ", docRef.id);
+        const orgDocRef = doc(db, `organizations/${org.id}`);
+        const orgDoc = await getDoc(orgDocRef);
+
+        if (orgDoc.exists()) {
+            // Update the existing organization
+            await setDoc(orgDocRef, org);
+        } else {
+            // Add a new organization
+            await addDoc(collection(db, 'organizations'), org);
+        }
     } catch (e) {
-        console.error("Error adding document: ", e);
+        console.error('Error adding or updating organization:', e);
     }
 }

@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loadPage(page, 
           db, 
           auth, createUserWithEmailAndPassword,
-          doc, setDoc, addDoc, collection,
+          doc, setDoc, getDoc, addDoc, collection,
           functions, httpsCallable
         );
       }
@@ -91,7 +91,7 @@ async function loadPage(
   page, 
   db, 
   auth, createUserWithEmailAndPassword,
-  doc, setDoc, addDoc, collection,
+  doc, setDoc, getDoc, addDoc, collection,
   functions, httpsCallable
 ) {
   const content = document.getElementById("content");
@@ -105,7 +105,7 @@ async function loadPage(
       db, 
       auth, createUserWithEmailAndPassword,
       mUserOrgId, 
-      doc, setDoc, 
+      doc, setDoc,
       functions, httpsCallable
     );
   }
@@ -115,7 +115,7 @@ async function loadPage(
     const response = await fetch("html/organization-details.html");
     const html = await response.text();
     content.innerHTML = html
-    setupOrganizationForm(db, addDoc, collection);
+    setupOrganizationForm(db, addDoc, doc, getDoc, setDoc, collection, mOrganization);
   }
 
   // Load Employee Hours screen
