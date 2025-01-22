@@ -78,6 +78,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Fetch organization and users
       await fetchAllData(db, mUserOrgId, getDoc, getDocs);
+
+      loadPage("user-management", db, 
+        auth, createUserWithEmailAndPassword,
+        doc, setDoc, getDoc, addDoc, collection,
+        functions, httpsCallable
+      );
     } else {
       // User is signed out
       showSignInScreen(auth);
