@@ -36,7 +36,8 @@ console.print(Text(f"Assistant:\n{initial_message}", style="bold green"))
 
 def getCodeBase():
     folder_path = '/Users/trevorwiebe/Documents/WebApps/timesheet/build'
-    processor = CodeBaseProvider(folder_path)
+    ignore_path = '/Users/trevorwiebe/Documents/WebApps/timesheet/'
+    processor = CodeBaseProvider(folder_path, ignore_path)
     processor.run()
     return processor.output
 
@@ -50,11 +51,15 @@ def mainPrompt(code_base):
     return SystemPromptGenerator(
         background=[
             "You are a helpful programming assistant that in knowledgable in html, css and javascript. Please review the codebase to determine best answer.",
-            code_base
+            "Each each new file starts with //----------file-starts--------",
+            "Then the file name like this //example.js or whatever the file is named",
+            "Then each file ends with //-----------file-ends---------",
+            "The codebase is in between triple back ticks."
+            f"```{code_base}```"
         ],
         steps=[
             "Analyze the user's question and determine how to reply in a clear, succinct manner.",
-            "Look at the provided code base at say which file should be updated.",
+            "Look at the provided code base and say which file should be updated.",
             "Make sure the response is no longer then necessary.",
         ],
         output_instructions=["Your output should human readable with no added formatting characters."]
@@ -69,7 +74,7 @@ def commitMessageGenPrompt(changes):
         ],
         steps=[
             "Go through and look at which files have changes.",
-            "Create very short message about what has changes"
+            "Create short message about what has changes"
         ],
         output_instructions=["Your output should only contain letters, numbers and puctuation.  No additional formatting characters."]
     )

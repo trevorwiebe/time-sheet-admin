@@ -11,7 +11,7 @@ def get_git_changes(folder):
         subprocess.run(["git", "status"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         
         # Get the full changes since the last commit
-        changes = subprocess.check_output(["git", "diff"], text=True).strip()
+        changes = subprocess.check_output(["git", "diff", "--cached"], text=True).strip()
 
         if changes:
             return f"Changes since the last commit:\n\n {changes}"

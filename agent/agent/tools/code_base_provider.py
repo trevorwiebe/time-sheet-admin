@@ -1,9 +1,9 @@
 import os
 import fnmatch
 
-def read_gitignore(folder_path):
+def read_gitignore(ignore_path):
     """Reads the .gitignore file and returns a list of patterns to ignore."""
-    gitignore_path = os.path.join(folder_path, '.gitignore')
+    gitignore_path = os.path.join(ignore_path, '.agentignore')
     ignore_patterns = []
     if os.path.exists(gitignore_path):
         with open(gitignore_path, 'r') as gitignore_file:
@@ -18,10 +18,10 @@ def is_ignored(path, ignore_patterns, folder_path):
             return True
     return False
 
-def process_folder(folder_path):
+def process_folder(folder_path, ignore_path):
     """Processes files in a folder, respecting .gitignore, and returns formatted content."""
     result = []
-    ignore_patterns = read_gitignore(folder_path)
+    ignore_patterns = read_gitignore(ignore_path)
 
     for root, _, files in os.walk(folder_path):
         for file_name in files:
@@ -36,14 +36,15 @@ def process_folder(folder_path):
                 content = "[Error reading file]"
 
             relative_path = os.path.relpath(file_path, folder_path)
-            result.append(f"{relative_path}:\n\n{content}\n//{'-' * 33}")
+            result.append(f"//----------file-starts--------\n//{relative_path}:\n{content}\n//-----------file-ends---------\n\n")
 
     return "\n".join(result)
 
 class CodeBaseProvider:
-    def __init__(self, folder_path):
+    def __init__(self, folder_path, ignore_path):
         self.folder_path = folder_path
+        self.ignore_path = ignore_path
         self.output = None
 
     def run(self):
-        self.output = process_folder(self.folder_path)
+        self.output = process_folder(self.folder_path, self.ignore_path)
