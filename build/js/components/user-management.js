@@ -40,6 +40,17 @@ export function loadUserManagement(
       );
     });
   }
+
+  const editUserDialog = document.getElementById("edit_user_box");
+  const userListItems = document.querySelectorAll('.user-list-item');
+
+  window.addEventListener("click", (event) => {
+    // Check if the click was outside the dialog
+    if (editUserDialog && !editUserDialog.contains(event.target) && !Array.from(userListItems).includes(event.target)) {
+      editUserDialog.style.display = "none"; // Close the dialog
+    }
+  });
+
 }
 
 function addNewUser(
@@ -112,8 +123,8 @@ function createUserListItem(user) {
   // Add a click event listener
   listItem.addEventListener('click', () => {
       // Handle the click event (e.g., show user details or edit user)
-      console.log(`User clicked: ${user.name}`);
-      // You can add more functionality here, like opening a modal or navigating to a user detail page.
+      const editUserDialog = document.getElementById("edit_user_box");
+      editUserDialog.style.display = "block";
   });
 
   return listItem;

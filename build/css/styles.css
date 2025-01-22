@@ -238,6 +238,28 @@ button:hover {
   padding: 10px;
 }
 
+#edit_user_box{
+  margin-left: auto;
+  margin-right: auto;
+  width: 500px;
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-bottom: 30px;
+  background-color: white;
+  z-index: 3;
+  border-radius: 6px;
+  display: none;
+  box-shadow: 0px 0px 100px var(--secondary);;
+}
+
+#edit_user_box_container{
+  position: fixed;
+  display: flex;
+  justify-self: center;
+  flex-wrap: wrap;
+  z-index: 2;
+}
+
 /* Organization Details */
 
 #payperiod-value{
@@ -247,6 +269,9 @@ button:hover {
 /* Extra small devices (phones, 600px and down) */
 @media only screen and (max-width: 600px) {
   main{
+    width: 100%;
+  }
+  #edit_user_box_container{
     width: 100%;
   }
   #user_box{
@@ -259,6 +284,9 @@ button:hover {
   main{
     width: 100%;
   }
+  #edit_user_box_container{
+    width: 100%;
+  }
   #user_box{
     width: 100%;
   }
@@ -267,6 +295,9 @@ button:hover {
 /* Medium devices (landscape tablets, 768px and up) */
 @media only screen and (min-width: 768px) {
   main{
+    width: 80%;
+  }
+  #edit_user_box_container{
     width: 80%;
   }
   #user_box{
@@ -279,6 +310,9 @@ button:hover {
   main{
     width: 70%;
   }
+  #edit_user_box_container{
+    width: 70%;
+  }
   #user_box{
     width: 45%;
   }
@@ -287,6 +321,9 @@ button:hover {
 /* Extra large devices (large laptops and desktops, 1200px and up) */
 @media only screen and (min-width: 1200px) {
   main{
+    width: 60%;
+  }
+  #edit_user_box_container{
     width: 60%;
   }
   #user_box{

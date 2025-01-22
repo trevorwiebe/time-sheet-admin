@@ -1,3 +1,34 @@
+<div id="edit_user_box_container">
+    <div id="edit_user_box">
+        <h2>Edit User</h2>
+        <form id="edit-user-form">
+            <div class="form-group">
+                <label for="edit-user-name">Name</label>
+                <input type="text" id="edit-user-name" name="edit-user-name" placeholder="Enter user's name" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-user-email">Email</label>
+                <input type="email" id="edit-user-email" name="edit-user-email" placeholder="Enter user email" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-hire-date">Hire Date</label>
+                <input type="date" id="edit-hire-date" name="edit-hire-date" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-admin-access">Admin Access</label>
+                <div class="checkbox-container">
+                    <label for="edit-admin-access" class="custom-checkbox">
+                        <input type="checkbox" id="edit-admin-access" name="edit-admin-access">
+                        <span class="checkmark"></span>
+                        This user is an admin user.
+                    </label>
+                </div>
+            </div>
+            <button id="edit-user-form-btn" type="submit">Update User</button>
+        </form>
+    </div>
+</div>
+
 <h2>User Management</h2>
 <p>Manage users, add new users, and update user details.</p>
 
@@ -31,7 +62,7 @@
                     </label>
                 </div>
             </div>
-            <button id="user-form-btn" type="submit">Save User</button>
+            <button id="user-form-btn" type="submit">Add User</button>
         </form>
     </div>
     
