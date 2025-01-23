@@ -38,7 +38,7 @@ export function loadUserManagement(
       const adminAccess = document.getElementById("admin-access").checked;
 
       // Call a function to handle adding the user (you'll need to implement this)
-      addNewUser(
+      await addNewUser(
         db, auth, 
         name, email, tempPassword, hireDate, organizationId, adminAccess,
         doc, setDoc, createUserWithEmailAndPassword,
@@ -102,8 +102,9 @@ async function addNewUser(
       return saveUserInDB(db, user, userId, organizationId, doc, setDoc);
     })
     .then((newUser) => {
-      updateUserCallback(newUser)
+      updateUserCallback(newUser);
 
+      updateUserAndRefreshToken(auth);
       const userList = document.getElementById("user-list");
       const listItem = createUserListItem(newUser, db, doc, setDoc, auth, updateEmail);
       userList.appendChild(listItem);
@@ -185,4 +186,21 @@ function createUserListItem(user, db, doc, setDoc, auth, updateEmail) {
   });
 
   return listItem;
+}
+
+async function updateUserAndRefreshToken(auth) {
+  const currentUser = auth.currentUser;
+
+  // Refresh the token for the signed-in user
+  if (currentUser) {
+      try {
+          const idTokenResult = await currentUser.getIdToken(true);
+          console.log('Token refreshed:', idTokenResult);
+          // Now you can access the updated claims
+      } catch (error) {
+          console.error('Error refreshing token:', error);
+      }
+  } else {
+      console.log('No user is currently signed in.');
+  }
 }
