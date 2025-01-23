@@ -110,12 +110,22 @@ async function addNewUser(
 
     // Then send the user back in the updateUserCallback to update the user list in main.js and refresh user tokens
     .then((newUser) => {
+
       // Send user back to main.js
       updateUserCallback(newUser);
-      
+      return {email: newUser.email, password: tempPassword}
+    })
+
+    .then((credentials) => {
+      const email = credentials.email;
+      const password = credentials.password;
+      // Send new user welcome email
+      return sendWelcomeEmail(email, password, httpsCallable, functions);
+    })
+
+    .then(() => {
       // Refresh the user tokens
       updateRefreshToken(auth);
-
     })
 
     // Show errors, if any
@@ -136,6 +146,18 @@ async function saveUserInDB(db, user, userId, organizationId, doc, setDoc){
   } catch (e) {
     console.error("Error adding user: ", e);
   }
+}
+
+// Send welcome email with firebase function
+async function sendWelcomeEmail(userEmail, userPassword, httpsCallable, functions){
+  const sendWelcomeEmail = httpsCallable(functions, 'sendWelcomeEmail');
+  sendWelcomeEmail({ email: userEmail, password: userPassword })
+    .then((result) => {
+        console.log(result.data.message);
+    })
+    .catch((error) => {
+        console.error('Error sending welcome email:', error);
+    });
 }
 
 function createUserListItem(user, db, doc, setDoc, httpsCallable, functions, deleteDoc) {
