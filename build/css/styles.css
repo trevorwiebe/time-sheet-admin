@@ -276,6 +276,23 @@ button:hover {
   z-index: 2;
 }
 
+#delete-user-btn{
+  margin-top: 20px;
+  width: 100%;
+  padding: 0.8rem;
+  background-color: white;
+  color: var(--tiertiary);
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  border: solid var(--tiertiary);
+}
+
+#delete-user-btn:hover{
+  background-color: white;
+}
+
 /* Organization Details */
 
 #payperiod-value{

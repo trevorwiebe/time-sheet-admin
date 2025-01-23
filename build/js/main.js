@@ -4,7 +4,7 @@ import {
   getFirestore, 
   setDoc, 
   doc, 
-  getDoc, getDocs,
+  getDoc, getDocs, deleteDoc,
   collection, 
   addDoc, 
   connectFirestoreEmulator 
@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loadPage(page, 
           db, 
           auth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
-          doc, setDoc, getDoc, addDoc, collection,
+          doc, setDoc, getDoc, addDoc, collection, deleteDoc,
           functions, httpsCallable
         );
       }
@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       loadPage("user-management", db, 
         auth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
-        doc, setDoc, getDoc, addDoc, collection,
+        doc, setDoc, getDoc, addDoc, collection, deleteDoc,
         functions, httpsCallable
       );
     } else {
@@ -106,7 +106,7 @@ async function loadPage(
   page, 
   db, 
   auth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
-  doc, setDoc, getDoc, addDoc, collection,
+  doc, setDoc, getDoc, addDoc, collection, deleteDoc,
   functions, httpsCallable
 ) {
   const content = document.getElementById("content");
@@ -121,7 +121,7 @@ async function loadPage(
       db, 
       auth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
       mUserOrgId, mUsers,
-      doc, setDoc,
+      doc, setDoc, deleteDoc,
       functions, httpsCallable,
       updateUserList
     );

@@ -3,7 +3,7 @@ export function loadUserManagement(
   db, 
   auth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
   organizationId, usersList,
-  doc, setDoc,
+  doc, setDoc, deleteDoc,
   functions, httpsCallable,
   updateUserCallback
 ) {
@@ -16,7 +16,7 @@ export function loadUserManagement(
     userList.innerHTML = ''; // Clear existing list
     if(users.length !== 0){
       users.forEach(user => {
-          const listItem = createUserListItem(user, db, doc, setDoc, httpsCallable, functions);
+          const listItem = createUserListItem(user, db, doc, setDoc, httpsCallable, functions, deleteDoc);
           userList.appendChild(listItem);
       });
       emptyListNote.style.display = "none";
@@ -41,8 +41,8 @@ export function loadUserManagement(
       await addNewUser(
         db, auth, 
         name, email, tempPassword, hireDate, organizationId, adminAccess,
-        doc, setDoc, createUserWithEmailAndPassword,
-        functions, httpsCallable, updateUserCallback, updateUser
+        doc, setDoc, deleteDoc, createUserWithEmailAndPassword,
+        functions, httpsCallable, updateUserCallback
       );
     });
   }
@@ -75,6 +75,7 @@ async function addNewUser(
   adminAccess,
   doc,
   setDoc,
+  deleteDoc,
   createUserWithEmailAndPassword,
   functions,
   httpsCallable,
@@ -105,7 +106,7 @@ async function addNewUser(
 
       updateUserAndRefreshToken(auth);
       const userList = document.getElementById("user-list");
-      const listItem = createUserListItem(newUser, db, doc, setDoc, httpsCallable, functions);
+      const listItem = createUserListItem(newUser, db, doc, setDoc, httpsCallable, functions, deleteDoc);
       userList.appendChild(listItem);
       document.getElementById("empty_user_list").style.display = "none";
     })
@@ -128,7 +129,7 @@ async function saveUserInDB(db, user, userId, organizationId, doc, setDoc){
   }
 }
 
-function createUserListItem(user, db, doc, setDoc, httpsCallable, functions) {
+function createUserListItem(user, db, doc, setDoc, httpsCallable, functions, deleteDoc) {
   const listItem = document.createElement('li');
   listItem.textContent = `${user.name} \n\n(${user.email})`; // Customize the display text
   listItem.classList.add('user-list-item'); // Add a class for styling
@@ -144,6 +145,7 @@ function createUserListItem(user, db, doc, setDoc, httpsCallable, functions) {
     const hireDate = document.getElementById("edit-hire-date");
     const adminAccess = document.getElementById("edit-admin-access");
     const updateBtn = document.getElementById("edit-user-form-btn");
+    const deleteUserBtn = document.getElementById("delete-user-btn");
 
     name.value = user.name;
     email.value = user.email;
@@ -168,8 +170,14 @@ function createUserListItem(user, db, doc, setDoc, httpsCallable, functions) {
       await setDoc(userRef, newUser);
 
       updateUserInAuth(newUser.id, email.value, name.value, httpsCallable, functions);
+    })
 
-      location.reload()
+    deleteUserBtn.addEventListener('click', async(e) => {
+      e.preventDefault();
+      const uid = user.id;
+      const orgId = user.organizationId;
+      deleteUser(uid, orgId, db, doc, httpsCallable, functions, deleteDoc);
+      // location.reload();
     })
 
   });
@@ -199,7 +207,25 @@ async function updateUserInAuth(uid, email, displayName, httpsCallable, function
   try {
       const result = await updateUserFunction({ uid, email, displayName });
       console.log(result.data.message);
+      location.reload()
   } catch (error) {
       console.error('Error updating user:', error);
   }
+}
+
+
+async function deleteUser(uid, organizationId, db, doc, httpsCallable, functions, deleteDoc) {
+
+  try{
+    const deleteUserFunction = httpsCallable(functions, 'deleteUser');
+    await deleteUserFunction({uid});
+    // Create a reference to the document using the userId
+    const userDocRef = doc(db, `organizations/${organizationId}/users/${uid}`);
+    // Use deleteDoc to remove the user document
+    await deleteDoc(userDocRef);
+
+    location.reload();
+  } catch{
+    console.log("an error occurred deleting user");
+  } 
 }
