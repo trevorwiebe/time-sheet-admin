@@ -108,16 +108,14 @@ async function addNewUser(
       return saveUserInDB(db, user, userId, organizationId, doc, setDoc);
     })
 
-    // Then send the user back in the updateUserCallback to update the user list in main.js
+    // Then send the user back in the updateUserCallback to update the user list in main.js and refresh user tokens
     .then((newUser) => {
+      // Send user back to main.js
       updateUserCallback(newUser);
       
       // Refresh the user tokens
       updateRefreshToken(auth);
-      const userList = document.getElementById("user-list");
-      const listItem = createUserListItem(newUser, db, doc, setDoc, httpsCallable, functions, deleteDoc);
-      userList.appendChild(listItem);
-      document.getElementById("empty_user_list").style.display = "none";
+
     })
 
     // Show errors, if any
@@ -193,13 +191,15 @@ function createUserListItem(user, db, doc, setDoc, httpsCallable, functions, del
   return listItem;
 }
 
-// This is necessary to update current user refresh token
+// This is necessary to update current user refresh token after customClaims for any user are edited for some reason
 async function updateRefreshToken(auth) {
   const currentUser = auth.currentUser;
   // Refresh the token for the signed-in user
   if (currentUser) {
       try {
           await currentUser.getIdToken(true);
+          // reload page to refresh data
+          location.reload();
       } catch (error) {
           console.error('Error refreshing token:', error);
       }
