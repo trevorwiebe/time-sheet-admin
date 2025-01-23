@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loadPage(page, 
           db, 
           auth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
-          doc, setDoc, getDoc, addDoc, collection, deleteDoc,
+          doc, setDoc, getDoc, getDocs, addDoc, collection, deleteDoc,
           functions, httpsCallable
         );
       }
@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       loadPage("user-management", db, 
         auth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
-        doc, setDoc, getDoc, addDoc, collection, deleteDoc,
+        doc, setDoc, getDoc, getDocs, addDoc, collection, deleteDoc,
         functions, httpsCallable
       );
     } else {
@@ -106,7 +106,7 @@ async function loadPage(
   page, 
   db, 
   auth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
-  doc, setDoc, getDoc, addDoc, collection, deleteDoc,
+  doc, setDoc, getDoc, getDocs, addDoc, collection, deleteDoc,
   functions, httpsCallable
 ) {
   const content = document.getElementById("content");
@@ -137,7 +137,7 @@ async function loadPage(
     const response = await fetch("html/organization-details.html");
     const html = await response.text();
     content.innerHTML = html
-    setupOrganizationForm(db, addDoc, doc, getDoc, setDoc, collection, mOrganization, updateOrganizationData);
+    await setupOrganizationForm(db, addDoc, doc, getDoc, getDocs, setDoc, collection, mOrganization, updateOrganizationData);
   }
 
   // Load Employee Hours screen
