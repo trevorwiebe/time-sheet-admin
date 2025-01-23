@@ -28,3 +28,13 @@ exports.updateUser = functions.https.onCall(async (data, context) => {
         return { success: false, message: error.message };
     }
 });
+
+exports.deleteUser = functions.https.onCall(async (data, context) => {
+    const { uid } = data.data;
+    try {
+        await admin.auth().deleteUser(uid);
+        return { success: true, message: 'User deleted successfully.' };
+    } catch (error) {
+        return { success: false, message: error.message };
+    }
+});
