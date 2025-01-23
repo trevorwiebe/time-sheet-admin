@@ -47,9 +47,10 @@ export function loadUserManagement(
     });
   }
 
+
+  // Check if user clicks on anything that should close the edit_user-box dialog
   const editUserDialog = document.getElementById("edit_user_box");
   const userListItems = document.querySelectorAll('.user-list-item');
-
   window.addEventListener("click", (event) => {
     // Check if the click was outside the dialog
     if (
@@ -81,13 +82,18 @@ async function addNewUser(
   httpsCallable,
   updateUserCallback,
 ) {
+  // First create auth user
   createUserWithEmailAndPassword(auth, email, tempPassword)
+
+    // Then set the organizationId as a custom claim
     .then((userCredential) => {
       const user = userCredential.user;
       // Set custom claims
       const setClaims = httpsCallable(functions, 'setCustomClaims');
       return setClaims({ uid: user.uid, organizationId: organizationId });
     })
+
+    // Then save the user in firestore database
     .then((successData) => {
       // Now we need to save the user in Firestore
       const userId = successData.data.uid;
@@ -101,15 +107,20 @@ async function addNewUser(
       };
       return saveUserInDB(db, user, userId, organizationId, doc, setDoc);
     })
+
+    // Then send the user back in the updateUserCallback to update the user list in main.js
     .then((newUser) => {
       updateUserCallback(newUser);
-
-      updateUserAndRefreshToken(auth);
+      
+      // Refresh the user tokens
+      updateRefreshToken(auth);
       const userList = document.getElementById("user-list");
       const listItem = createUserListItem(newUser, db, doc, setDoc, httpsCallable, functions, deleteDoc);
       userList.appendChild(listItem);
       document.getElementById("empty_user_list").style.display = "none";
     })
+
+    // Show errors, if any
     .catch((error) => {
       const errorCode = error.code;
       const errorMessage = error.message;
@@ -134,9 +145,8 @@ function createUserListItem(user, db, doc, setDoc, httpsCallable, functions, del
   listItem.textContent = `${user.name} \n\n(${user.email})`; // Customize the display text
   listItem.classList.add('user-list-item'); // Add a class for styling
 
-  // Add a click event listener
   listItem.addEventListener('click', () => {
-    // Handle the click event (e.g., show user details or edit user)
+    // Show edit user dialog box
     const editUserDialog = document.getElementById("edit_user_box");
     editUserDialog.style.display = "block";
 
@@ -144,14 +154,15 @@ function createUserListItem(user, db, doc, setDoc, httpsCallable, functions, del
     const email = document.getElementById("edit-user-email");
     const hireDate = document.getElementById("edit-hire-date");
     const adminAccess = document.getElementById("edit-admin-access");
-    const updateBtn = document.getElementById("edit-user-form-btn");
-    const deleteUserBtn = document.getElementById("delete-user-btn");
 
+    // Fill fields with current user details
     name.value = user.name;
     email.value = user.email;
     hireDate.value = user.hireDate;
     adminAccess.checked = user.adminAccess;
 
+    // Update user button
+    const updateBtn = document.getElementById("edit-user-form-btn");
     updateBtn.addEventListener('click', async (e) => {
 
       e.preventDefault();
@@ -165,19 +176,16 @@ function createUserListItem(user, db, doc, setDoc, httpsCallable, functions, del
         organizationId: user.organizationId
       }
 
-      // Update user in Firebase Auth
-      const userRef = doc(db, `organizations/${user.organizationId}/users/${user.id}`);
-      await setDoc(userRef, newUser);
-
-      updateUserInAuth(newUser.id, email.value, name.value, httpsCallable, functions);
+      updateUser(newUser, db, setDoc, doc, httpsCallable, functions);
     })
 
+    // Delete user button
+    const deleteUserBtn = document.getElementById("delete-user-btn");
     deleteUserBtn.addEventListener('click', async(e) => {
       e.preventDefault();
       const uid = user.id;
       const orgId = user.organizationId;
       deleteUser(uid, orgId, db, doc, httpsCallable, functions, deleteDoc);
-      // location.reload();
     })
 
   });
@@ -185,15 +193,13 @@ function createUserListItem(user, db, doc, setDoc, httpsCallable, functions, del
   return listItem;
 }
 
-async function updateUserAndRefreshToken(auth) {
+// This is necessary to update current user refresh token
+async function updateRefreshToken(auth) {
   const currentUser = auth.currentUser;
-
   // Refresh the token for the signed-in user
   if (currentUser) {
       try {
-          const idTokenResult = await currentUser.getIdToken(true);
-          console.log('Token refreshed:', idTokenResult);
-          // Now you can access the updated claims
+          await currentUser.getIdToken(true);
       } catch (error) {
           console.error('Error refreshing token:', error);
       }
@@ -202,28 +208,37 @@ async function updateUserAndRefreshToken(auth) {
   }
 }
 
-async function updateUserInAuth(uid, email, displayName, httpsCallable, functions) {
-  const updateUserFunction = httpsCallable(functions, 'updateUser');
+// Update user in auth and in firestore
+async function updateUser(newUser, db, setDoc, doc, httpsCallable, functions) {
+  const uid = newUser.id;
+  const email = newUser.email;
+  const displayName = newUser.name;
+  const organizationId = newUser.organizationId;
   try {
-      const result = await updateUserFunction({ uid, email, displayName });
-      console.log(result.data.message);
-      location.reload()
+    // Use updateUser function, because this is admin.auth() functionality
+    const updateUserFunction = httpsCallable(functions, 'updateUser');
+    await updateUserFunction({ uid, email, displayName });
+    // Update user in Firebase Auth
+    const userRef = doc(db, `organizations/${organizationId}/users/${uid}`);
+    await setDoc(userRef, newUser);
+    // Reload page when finished updating user
+    location.reload()
   } catch (error) {
-      console.error('Error updating user:', error);
+    console.error('Error updating user:', error);
   }
 }
 
-
+// Delete user in auth and in firestore
 async function deleteUser(uid, organizationId, db, doc, httpsCallable, functions, deleteDoc) {
-
   try{
+    // Need to use a function to delete user, because this is admin.auth() functionality
     const deleteUserFunction = httpsCallable(functions, 'deleteUser');
     await deleteUserFunction({uid});
     // Create a reference to the document using the userId
     const userDocRef = doc(db, `organizations/${organizationId}/users/${uid}`);
     // Use deleteDoc to remove the user document
     await deleteDoc(userDocRef);
-
+    // Reload page when finished deleting user
     location.reload();
   } catch{
     console.log("an error occurred deleting user");
