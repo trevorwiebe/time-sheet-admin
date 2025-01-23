@@ -18,3 +18,13 @@ exports.setCustomClaims = functions.https.onCall(async (data, context) => {
         throw new functions.https.HttpsError('internal', 'Unable to set custom claims.');
     }
 })
+
+exports.updateUser = functions.https.onCall(async (data, context) => {
+    const { uid, email, displayName } = data.data;
+    try {
+        await admin.auth().updateUser(uid, { email, displayName });
+        return { success: true, message: 'User updated successfully.' };
+    } catch (error) {
+        return { success: false, message: error.message };
+    }
+});
