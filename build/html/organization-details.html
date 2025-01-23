@@ -1,33 +1,37 @@
-<h2>Organization Details</h2>
-<p>View and update organization settings like pay period start day and duration.</p>
-<form id="org-form">
-    <div class="form-group">
-        <label for="org-name-field">Organization Name</label>
-        <input type="text" id="org-name-field" name="org-name-field" placeholder="Organization name" required>
+<div id="org-details-flex-box">
+    <div id="org-details-container">
+        <h2>Organization Details</h2>
+        <p>View and update organization settings like pay period start day and duration.</p>
+        <form id="org-form">
+            <div class="form-group">
+                <label for="org-name-field">Organization Name</label>
+                <input type="text" id="org-name-field" name="org-name-field" placeholder="Organization name" required>
+            </div>
+            <div class="form-group">
+                <label for="day-selector">Day of week pay period starts</label>
+                <select id="day-selector" class="custom-selector">
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="payperiod-value">Pay period duration</label>
+                <input type="number" id="payperiod-value" placeholder="Enter number">
+                <select id="unit-selector" class="custom-selector">
+                    <option value="day">Day</option>
+                    <option value="week">Week</option>
+                    <option value="month">Month</option>
+                </select>
+            </div>
+            <button id="org-form-btn" type="submit">Save</button>
+            <div class="update_success_box" id="update_success_box">
+                <p id="message" class="message"></p>
+            </div>
+        </form>
     </div>
-    <div class="form-group">
-        <label for="day-selector">Day of week pay period starts</label>
-        <select id="day-selector" class="custom-selector">
-            <option value="Monday">Monday</option>
-            <option value="Tuesday">Tuesday</option>
-            <option value="Wednesday">Wednesday</option>
-            <option value="Thursday">Thursday</option>
-            <option value="Friday">Friday</option>
-            <option value="Saturday">Saturday</option>
-            <option value="Sunday">Sunday</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="payperiod-value">Pay period duration</label>
-        <input type="number" id="payperiod-value" placeholder="Enter number">
-        <select id="unit-selector" class="custom-selector">
-            <option value="day">Day</option>
-            <option value="week">Week</option>
-            <option value="month">Month</option>
-        </select>
-    </div>
-    <button id="org-form-btn" type="submit">Save</button>
-    <div class="update_success_box" id="update_success_box">
-        <p id="message" class="message"></p>
-    </div>
-</form>
+</div>

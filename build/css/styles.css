@@ -272,6 +272,17 @@ button:hover {
   width: 5em;
 }
 
+#org-details-container{
+  width: 50%;
+}
+
+#org-details-flex-box{
+  width: 100%;
+  flex-wrap: wrap;
+  display: flex;
+  justify-content: center;
+}
+
 /* Extra small devices (phones, 600px and down) */
 @media only screen and (max-width: 600px) {
   main{
@@ -283,12 +294,18 @@ button:hover {
   #user_box{
     width: 100%;
   }
+  #org-details-container{
+    width: 100%;
+  }
 }
 
 /* Small devices (portrait tablets and large phones, 600px and up) */
 @media only screen and (min-width: 600px) {
   main{
     width: 100%;
+  }
+  #org-details-container{
+    width: 70%;
   }
   #edit_user_box_container{
     width: 100%;
@@ -305,6 +322,9 @@ button:hover {
   }
   #edit_user_box_container{
     width: 80%;
+  }
+  #org-details-container{
+    width: 60%;
   }
   #user_box{
     width: 45%;
