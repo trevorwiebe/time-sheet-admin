@@ -1,6 +1,7 @@
 <div id="org-details-flex-box">
     <div id="org-details-container">
         <h2>Organization Details</h2>
+        <h3>Edit Organization</h3>
         <form id="org-form">
             <div class="form-group">
                 <label for="org-name-field">Organization Name</label>
@@ -32,5 +33,20 @@
                 <p id="message" class="message"></p>
             </div>
         </form>
+        <h3>Rates</h3>
+        <div id="rates_container">
+            <div id="rates_box">
+                <form id="new-rate-form">
+                    <div class="form-group">
+                        <label for="rate-name-field">Rate name</label>
+                        <input type="text" id="rate-name-field" name="rate-name-field" placeholder="Rate" required>
+                    </div>
+                    <button id="rate-form-btn" type="submit">Save Rate</button>
+                </form>
+            </div>
+            <div id="rates_box">
+                <ul id="rates_list"></ul> <!-- Dynamically fill this list -->
+            </div>
+        </div>
     </div>
 </div>

@@ -1,6 +1,6 @@
-
 export function setupOrganizationForm(db, addDoc, doc, getDoc, setDoc, collection, org, updateCallback) {
     
+    // Edit organization
     const form = document.getElementById("org-form");
     const name = document.getElementById("org-name-field");
     const payPeriodDOWStart = document.getElementById("day-selector");
@@ -28,6 +28,18 @@ export function setupOrganizationForm(db, addDoc, doc, getDoc, setDoc, collectio
             updateCallback(newOrg)
         });
     }
+
+    // Add or edit rates
+    const rateForm = document.getElementById('new-rate-form');
+    if(rateForm){
+        rateForm.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent default form submission
+            const rateName = document.getElementById('rate-name-field').value;
+     
+            // Call the saveRate function
+            const result = await saveRate(db, addDoc, collection, org.id, rateName);
+        });
+    }
 }
 
 async function updateOrg(db, addDoc, doc, getDoc, setDoc, collection, org) {
@@ -53,5 +65,21 @@ async function updateOrg(db, addDoc, doc, getDoc, setDoc, collection, org) {
         document.getElementById("message").innerHTML = "Organization saved successfully"
     } catch (e) {
         console.error('Error adding or updating organization:', e);
+    }
+}
+
+async function saveRate(db, addDoc, collection, organizationId, rate) {
+    try {
+        // Create a reference to the rates collection for the organization
+        const ratesCollectionRef = collection(db, `organizations/${organizationId}/rates`);
+
+        // Save the rate in Firestore with an auto-generated ID
+        const docRef = await addDoc(ratesCollectionRef, { description: rate });
+
+        console.log('Rate saved successfully with ID:', docRef.id);
+        return { success: true, message: 'Rate saved successfully!', rateId: docRef.id };
+    } catch (error) {
+        console.error('Error saving rate:', error);
+        return { success: false, message: 'Error saving rate.' };
     }
 }

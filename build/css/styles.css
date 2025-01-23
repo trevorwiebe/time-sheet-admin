@@ -312,7 +312,11 @@ button:hover {
 }
 
 #org-details-container{
-  width: 50%;
+  width: 70%;
+}
+
+#org-form{
+  padding: 10px;
 }
 
 #org-details-flex-box{
@@ -320,6 +324,18 @@ button:hover {
   flex-wrap: wrap;
   display: flex;
   justify-content: center;
+}
+
+#rates_container{
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 50px;
+}
+
+#rates_box{
+  width: 45%;
+  padding: 10px;
 }
 
 /* Extra small devices (phones, 600px and down) */
@@ -344,7 +360,7 @@ button:hover {
     width: 100%;
   }
   #org-details-container{
-    width: 70%;
+    width: 80%;
   }
   #edit_user_box_container{
     width: 100%;
@@ -363,7 +379,7 @@ button:hover {
     width: 80%;
   }
   #org-details-container{
-    width: 60%;
+    width: 70%;
   }
   #user_box{
     width: 45%;
@@ -378,6 +394,9 @@ button:hover {
   #edit_user_box_container{
     width: 70%;
   }
+  #org-details-container{
+    width: 70%;
+  }
   #user_box{
     width: 45%;
   }
@@ -389,6 +408,9 @@ button:hover {
     width: 60%;
   }
   #edit_user_box_container{
+    width: 60%;
+  }
+  #org-details-container{
     width: 60%;
   }
   #user_box{
