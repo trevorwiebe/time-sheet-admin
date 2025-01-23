@@ -17,7 +17,6 @@ import {
   signOut, 
   connectAuthEmulator,
   updateProfile,
-  updateEmail,
   sendEmailVerification,
   updatePassword,
   sendPasswordResetEmail,
@@ -66,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if(page != "sign-user-out"){
         loadPage(page, 
           db, 
-          auth, createUserWithEmailAndPassword, updateProfile, updateEmail, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
+          auth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
           doc, setDoc, getDoc, addDoc, collection,
           functions, httpsCallable
         );
@@ -90,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       loadPage("user-management", db, 
-        auth, createUserWithEmailAndPassword, updateProfile, updateEmail, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
+        auth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
         doc, setDoc, getDoc, addDoc, collection,
         functions, httpsCallable
       );
@@ -106,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
 async function loadPage(
   page, 
   db, 
-  auth, createUserWithEmailAndPassword, updateProfile, updateEmail, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
+  auth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
   doc, setDoc, getDoc, addDoc, collection,
   functions, httpsCallable
 ) {
@@ -120,7 +119,7 @@ async function loadPage(
     content.innerHTML = html;
     loadUserManagement(
       db, 
-      auth, createUserWithEmailAndPassword, updateProfile, updateEmail, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
+      auth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
       mUserOrgId, mUsers,
       doc, setDoc,
       functions, httpsCallable,

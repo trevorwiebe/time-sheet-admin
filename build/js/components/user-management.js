@@ -1,11 +1,11 @@
 
 export function loadUserManagement(
   db, 
-  auth, createUserWithEmailAndPassword, updateProfile, updateEmail, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
+  auth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
   organizationId, usersList,
   doc, setDoc,
   functions, httpsCallable,
-  updateUserCallback, updateUser
+  updateUserCallback
 ) {
   const form = document.getElementById("user-form");
   const userList = document.getElementById("user-list");
@@ -16,7 +16,7 @@ export function loadUserManagement(
     userList.innerHTML = ''; // Clear existing list
     if(users.length !== 0){
       users.forEach(user => {
-          const listItem = createUserListItem(user, db, doc, setDoc, auth, updateEmail)
+          const listItem = createUserListItem(user, db, doc, setDoc, httpsCallable, functions);
           userList.appendChild(listItem);
       });
       emptyListNote.style.display = "none";
@@ -79,7 +79,6 @@ async function addNewUser(
   functions,
   httpsCallable,
   updateUserCallback,
-  updateEmail
 ) {
   createUserWithEmailAndPassword(auth, email, tempPassword)
     .then((userCredential) => {
@@ -106,7 +105,7 @@ async function addNewUser(
 
       updateUserAndRefreshToken(auth);
       const userList = document.getElementById("user-list");
-      const listItem = createUserListItem(newUser, db, doc, setDoc, auth, updateEmail);
+      const listItem = createUserListItem(newUser, db, doc, setDoc, httpsCallable, functions);
       userList.appendChild(listItem);
       document.getElementById("empty_user_list").style.display = "none";
     })
@@ -129,7 +128,7 @@ async function saveUserInDB(db, user, userId, organizationId, doc, setDoc){
   }
 }
 
-function createUserListItem(user, db, doc, setDoc, auth, updateEmail) {
+function createUserListItem(user, db, doc, setDoc, httpsCallable, functions) {
   const listItem = document.createElement('li');
   listItem.textContent = `${user.name} \n\n(${user.email})`; // Customize the display text
   listItem.classList.add('user-list-item'); // Add a class for styling
@@ -168,19 +167,9 @@ function createUserListItem(user, db, doc, setDoc, auth, updateEmail) {
       const userRef = doc(db, `organizations/${user.organizationId}/users/${user.id}`);
       await setDoc(userRef, newUser);
 
-      // Update user in Firebase Auth
-      const authUserRef = auth.currentUser;
-      if (authUserRef) {
-          // Update the user's email
-          const userCredential = await updateEmail(authUserRef, email.value);
-          
-          // Optionally, you can handle the response or errors here
-          console.log('User updated successfully:', userCredential);
-          // location.reload();
-      } else {
-          throw new Error('No user is currently signed in.');
-      }
+      updateUserInAuth(newUser.id, email.value, name.value, httpsCallable, functions);
 
+      location.reload()
     })
 
   });
@@ -202,5 +191,15 @@ async function updateUserAndRefreshToken(auth) {
       }
   } else {
       console.log('No user is currently signed in.');
+  }
+}
+
+async function updateUserInAuth(uid, email, displayName, httpsCallable, functions) {
+  const updateUserFunction = httpsCallable(functions, 'updateUser');
+  try {
+      const result = await updateUserFunction({ uid, email, displayName });
+      console.log(result.data.message);
+  } catch (error) {
+      console.error('Error updating user:', error);
   }
 }
