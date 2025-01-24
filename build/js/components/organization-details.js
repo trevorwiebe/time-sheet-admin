@@ -1,3 +1,5 @@
+let mRateList = ""
+
 export async function setupOrganizationForm(db, addDoc, doc, getDoc, getDocs, setDoc, collection, org, updateCallback) {
     
     // Edit organization
@@ -30,15 +32,8 @@ export async function setupOrganizationForm(db, addDoc, doc, getDoc, getDocs, se
     }
 
     // Fetch any available rates
-    const rateList = document.getElementById("rates_list");
-    const rates = await fetchRates(db, org.id, collection, getDocs);
-    rateList.innerHTML = '';
-    if(rates.length !== 0){
-        rates.forEach(rate => {
-            const rateListItem = createRateListItem(rate);
-            rateList.appendChild(rateListItem);
-        })
-    }
+    mRateList = await fetchRates(db, org.id, collection, getDocs);
+    setupRatesLi(doc, setDoc, db, org.id)
 
     // Add or edit rates
     const rateForm = document.getElementById('new-rate-form');
@@ -50,12 +45,27 @@ export async function setupOrganizationForm(db, addDoc, doc, getDoc, getDocs, se
             // Call the saveRate function
             await saveRate(db, addDoc, collection, org.id, rateName.value)
                 .then((rate) => {
-                    const rateListItem = createRateListItem(rate);
-                    rateList.appendChild(rateListItem);
-                    rateName.value = "";
+                    mRateList = updateRatesList(mRateList, rateName, false);
+                    setupRatesLi(doc, setDoc, db, org.id)
                 })
         });
     }
+
+
+    // Check if user clicks on anything that should close the edit_user-box dialog
+    const editRatesDialog = document.getElementById("edit_rate_dialog");
+    const ratesListItems = document.querySelectorAll('.timesheet-list-item');
+    window.addEventListener("click", (event) => {
+        // Check if the click was outside the dialog
+        if (
+            editRatesDialog && 
+            !editRatesDialog.contains(event.target) && 
+            !Array.from(ratesListItems).includes(event.target) &&
+            event.target.id != "edit-rate-form-btn"
+        ) {
+            editRatesDialog.style.display = "none";
+        }
+    });
 }
 
 async function updateOrg(db, addDoc, doc, getDoc, setDoc, collection, org) {
@@ -114,10 +124,80 @@ async function fetchRates(db, organizationId, collection, getDocs) {
     }
 }
 
-function createRateListItem(rate){
+function setupRatesLi(doc, setDoc, db, orgId){
+    const rateList = document.getElementById("rates_list");
+    rateList.innerHTML = '';
+    if(mRateList.length !== 0){
+        mRateList.forEach(rate => {
+            const rateListItem = createRateListItem(rate, doc, setDoc, db, orgId);
+            rateList.appendChild(rateListItem);
+        })
+    }
+}
+
+function createRateListItem(rate, doc, setDoc, db, organizationId){
     const rateItem = document.createElement('li');
     rateItem.textContent = rate.description;
-    rateItem.classList.add('user-list-item');
+    rateItem.classList.add('timesheet-list-item');
+
+    rateItem.addEventListener('click', (e)=>{
+        e.preventDefault();
+
+        const editRateDialog = document.getElementById("edit_rate_dialog")
+        editRateDialog.style.display = "block";
+
+        const rateField = document.getElementById("edit-rate-name-field");
+        rateField.value = rate.description;
+
+        const editRateForm = document.getElementById("edit-rate-form")
+        editRateForm.addEventListener('submit', async(e) =>{
+            e.preventDefault();
+
+            const rateId = rate.id;
+            delete rate.id;
+            rate.description = rateField.value;
+            const newRate = await updateRate(db, doc, setDoc, organizationId, rateId, rate);
+            mRateList = updateRatesList(mRateList, newRate, false);
+            setupRatesLi(doc, setDoc, db, organizationId)
+
+            editRateDialog.style.display = "none";
+        })
+    })
     
     return rateItem;
+}
+
+async function updateRate(db, doc, setDoc, organizationId, rateId, newRate) {
+    try {
+        // Create a reference to the rate document
+        const rateDocRef = doc(db, `organizations/${organizationId}/rates/${rateId}`);
+
+        // Update the rate in Firestore
+        await setDoc(rateDocRef, { description: newRate.description }, { merge: true });
+
+        // Return new rate
+        return newRate;
+    } catch (error) {
+        console.error('Error updating rate:', error);
+        return { success: false, message: 'Error updating rate.' };
+    }
+}
+
+function updateRatesList(ratesList, rate, shouldDelete) {
+    if (shouldDelete) {
+        // Remove the rate from the list
+        return ratesList.filter(existingRate => existingRate.id !== rate.id);
+    } else {
+        // Check if the rate already exists in the list
+        const existingRateIndex = ratesList.findIndex(existingRate => existingRate.id === rate.id);
+
+        if (existingRateIndex !== -1) {
+            // Update the existing rate
+            ratesList[existingRateIndex] = rate;
+        } else {
+            // Add the new rate to the list
+            ratesList.push(rate);
+        }
+        return ratesList;
+    }
 }

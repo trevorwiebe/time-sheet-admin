@@ -50,7 +50,7 @@ export function loadUserManagement(
 
   // Check if user clicks on anything that should close the edit_user-box dialog
   const editUserDialog = document.getElementById("edit_user_box");
-  const userListItems = document.querySelectorAll('.user-list-item');
+  const userListItems = document.querySelectorAll('.timesheet-list-item');
   window.addEventListener("click", (event) => {
     // Check if the click was outside the dialog
     if (
@@ -163,7 +163,7 @@ async function sendWelcomeEmail(userEmail, userPassword, httpsCallable, function
 function createUserListItem(user, db, doc, setDoc, httpsCallable, functions, deleteDoc) {
   const listItem = document.createElement('li');
   listItem.textContent = `${user.name} \n\n(${user.email})`; // Customize the display text
-  listItem.classList.add('user-list-item'); // Add a class for styling
+  listItem.classList.add('timesheet-list-item'); // Add a class for styling
 
   listItem.addEventListener('click', () => {
     // Show edit user dialog box

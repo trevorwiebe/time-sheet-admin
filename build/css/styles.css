@@ -28,7 +28,7 @@ header {
   text-align: center;
   width: 100%;
   display: none;
-  z-index: 1000; /* Optional: Keep it above other content */
+  z-index: 2;
 }
 
 footer {
@@ -38,6 +38,7 @@ footer {
   padding: 1rem;
   display: none;
   width: 100%;
+  z-index: 2;
 }
 
 #footer_text{
@@ -56,6 +57,14 @@ main{
   width: 100%;
 }
 
+#shadow{
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.4);
+  z-index: 3;
+  display: block;
+}
 
 /* Navigation Bar */
 nav {
@@ -112,12 +121,19 @@ main {
 
 /* Sign In box */
 #signin-container {
+  margin-top: 100px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+#signin-form-div {
   background-color: white;
   padding: 2rem;
   border-radius: 6px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 400px;
+  width: 50%;
+  z-index: 5;
 }
 
 h2 {
@@ -230,7 +246,7 @@ button:hover {
   padding: 10px;
 }
 
-.user-list-item {
+.timesheet-list-item {
   padding: 10px;
   margin: 5px 0;
   border: 1px solid #ccc;
@@ -240,7 +256,7 @@ button:hover {
   transition: background-color 0.2s;
 }
 
-.user-list-item:hover {
+.timesheet-list-item:hover {
   background-color: #f4f4f4;
 }
 
@@ -274,7 +290,7 @@ ul{
   padding-right: 30px;
   padding-bottom: 30px;
   background-color: white;
-  z-index: 3;
+  z-index: 5;
   border-radius: 6px;
   display: none;
   box-shadow: 0px 0px 100px var(--secondary);;
@@ -290,20 +306,20 @@ ul{
   position: fixed;
   display: flex;
   flex-wrap: wrap;
-  z-index: 2;
+  z-index: 5;
 }
 
-#delete-user-btn{
+.secondary_btn{
   margin-top: 20px;
   width: 100%;
   padding: 0.8rem;
   background-color: white;
-  color: var(--tiertiary);
+  color: red;
   border: none;
   border-radius: 6px;
   font-size: 1rem;
   cursor: pointer;
-  border: solid var(--tiertiary);
+  border: solid red;
 }
 
 #delete-user-btn:hover{
@@ -343,12 +359,35 @@ ul{
   padding: 10px;
 }
 
+#edit-rate-dialog-container{
+  position: fixed;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  z-index: 5;
+}
+
+#edit_rate_dialog{
+  margin-left: auto;
+  margin-right: auto;
+  width: 300px;
+  padding-top: 10px;
+  padding-right: 30px;
+  padding-left: 30px;
+  padding-bottom: 30px;
+  background-color: white;
+  z-index: 5;
+  display: none;
+  border-radius: 6px;
+  box-shadow: 0px 0px 100px var(--secondary);;
+}
+
 /* Extra small devices (phones, 600px and down) */
 @media only screen and (max-width: 600px) {
   main{
     width: 100%;
   }
-  #edit_user_box_container{
+  #edit_user_box_container, #edit-rate-dialog-container{
     width: 100%;
   }
   #user_box{
@@ -367,7 +406,7 @@ ul{
   #org-details-container{
     width: 80%;
   }
-  #edit_user_box_container{
+  #edit_user_box_container, #edit-rate-dialog-container{
     width: 100%;
   }
   #user_box{
@@ -380,7 +419,7 @@ ul{
   main{
     width: 80%;
   }
-  #edit_user_box_container{
+  #edit_user_box_container, #edit-rate-dialog-container{
     width: 80%;
   }
   #org-details-container{
@@ -396,7 +435,7 @@ ul{
   main{
     width: 70%;
   }
-  #edit_user_box_container{
+  #edit_user_box_container, #edit-rate-dialog-container{
     width: 70%;
   }
   #org-details-container{
@@ -412,7 +451,7 @@ ul{
   main{
     width: 60%;
   }
-  #edit_user_box_container{
+  #edit_user_box_container, #edit-rate-dialog-container{
     width: 60%;
   }
   #org-details-container{

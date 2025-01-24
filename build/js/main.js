@@ -181,6 +181,9 @@ function showSignInScreen(auth) {
   const footer = document.getElementById("main_footer")
   footer.style.display = "none"
 
+  const shadowDiv = document.getElementById("shadow");
+  shadowDiv.style.display = "block";
+
   // Show sign in box
   const content = document.getElementById("content");
   content.innerHTML = signInHTML
@@ -235,7 +238,9 @@ function onSignInSuccess(auth){
   const footer = document.getElementById("main_footer")
   footer.style.display = "block"
 
-  
+  const shadowDiv = document.getElementById("shadow");
+  shadowDiv.style.display = "none";
+
   const signInContainer = document.getElementById("signin-container")
   if(signInContainer){
       signInContainer.style.display = "none"
@@ -265,6 +270,7 @@ function updateUserList(updatedUser){
 
 const signInHTML = `
     <div id="signin-container">
+      <div id="signin-form-div">
         <h2>Sign In</h2>
         <form id="signin-form">
         <div class="form-group">
@@ -278,5 +284,6 @@ const signInHTML = `
         <p id="sign_in_error"></p>
         <button id="signin_button" type="submit">Sign In</button>
         </form>
+      </div>
     </div>
 `
