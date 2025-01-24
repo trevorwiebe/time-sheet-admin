@@ -2,6 +2,7 @@
   --primary: #CFD2CD;
   --secondary: #50514F;
   --tiertiary: #0C0A3E;
+  --tiertiary_hover: #26236b;
   --background: #ffffff;
 }
 
@@ -176,9 +177,9 @@ button {
 }
 
 button:hover {
-  background-color: var(--tiertiary);
+  background-color: var(--tiertiary_hover);
   transition: 0.2s;
-  box-shadow: #333 0px 0px 5px;
+  box-shadow: 0px 0px 2px #3b3b3b;
 }
 
 #sign_in_error{
@@ -248,8 +249,9 @@ button:hover {
 
 .timesheet-list-item {
   padding: 10px;
-  margin: 5px 0;
-  border: 1px solid #ccc;
+  margin: 5px;
+  margin-right: -20px;
+  border: 1px solid var(--tiertiary);
   border-radius: 6px;
   cursor: pointer;
   list-style-type: none;
@@ -258,6 +260,7 @@ button:hover {
 
 .timesheet-list-item:hover {
   background-color: #f4f4f4;
+  box-shadow: 0px 0px 2px #3b3b3b;
 }
 
 ul{
@@ -351,19 +354,19 @@ ul{
   justify-content: center;
 }
 
-#rates_container{
+#rates_container, #accountant_container{
   width: 100%;
   display: flex;
   flex-wrap: wrap;
-  margin-bottom: 50px;
+  margin-bottom: 70px;
 }
 
-#rates_box{
+#rates_box, #accountant_box{
   width: 45%;
   padding: 10px;
 }
 
-#edit-rate-dialog-container{
+#edit-rate-dialog-container, #edit-accountant-dialog-container{
   position: fixed;
   display: flex;
   flex-wrap: wrap;
@@ -371,7 +374,7 @@ ul{
   z-index: 5;
 }
 
-#edit_rate_dialog{
+#edit_rate_dialog, #edit_accountant_dialog{
   margin-left: auto;
   margin-right: auto;
   width: 300px;
@@ -386,7 +389,7 @@ ul{
   box-shadow: 0px 0px 100px var(--secondary);;
 }
 
-#no-rates-p{
+#no-rates-p, #no-accountants-p{
   text-align: center;
 }
 
@@ -395,7 +398,9 @@ ul{
   main{
     width: 100%;
   }
-  #edit_user_box_container, #edit-rate-dialog-container{
+  #edit_user_box_container, 
+  #edit-rate-dialog-container,
+  #edit-accountant-dialog-container{
     width: 100%;
   }
   #user_box{
@@ -414,7 +419,9 @@ ul{
   #org-details-container{
     width: 80%;
   }
-  #edit_user_box_container, #edit-rate-dialog-container{
+  #edit_user_box_container, 
+  #edit-rate-dialog-container, 
+  #edit-accountant-dialog-container{
     width: 100%;
   }
   #user_box{
@@ -427,7 +434,9 @@ ul{
   main{
     width: 80%;
   }
-  #edit_user_box_container, #edit-rate-dialog-container{
+  #edit_user_box_container, 
+  #edit-rate-dialog-container,
+  #edit-accountant-dialog-container{
     width: 80%;
   }
   #org-details-container{
@@ -443,7 +452,9 @@ ul{
   main{
     width: 70%;
   }
-  #edit_user_box_container, #edit-rate-dialog-container{
+  #edit_user_box_container, 
+  #edit-rate-dialog-container,
+  #edit-accountant-dialog-container{
     width: 70%;
   }
   #org-details-container{
@@ -459,7 +470,9 @@ ul{
   main{
     width: 60%;
   }
-  #edit_user_box_container, #edit-rate-dialog-container{
+  #edit_user_box_container, 
+  #edit-rate-dialog-container,
+  #edit-accountant-dialog-container{
     width: 60%;
   }
   #org-details-container{

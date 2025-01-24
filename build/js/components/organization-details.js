@@ -1,4 +1,5 @@
-let mRateList = ""
+let mRateList = "";
+let mAccountantList = "";
 
 export async function setupOrganizationForm(db, addDoc, doc, getDoc, getDocs, setDoc, deleteDoc, collection, org, updateCallback) {
     
@@ -52,25 +53,47 @@ export async function setupOrganizationForm(db, addDoc, doc, getDoc, getDocs, se
         });
     }
 
+    const accountantForm = document.getElementById('new-accountant-form');
+    if(accountantForm){
+        accountantForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const name = document.getElementById('accountant-name-field');
+            const email = document.getElementById('accountant-email-field');
+
+            const accountant = { name: name.value, email: email.value };
+            await saveAccountant(db, addDoc, collection, org.id, accountant)
+                .then((accountant) => {
+                    mAccountantList = updateAccountList(mAccountantList, accountant, false);
+                    setupAccountantsLi(db, org.id, collection, getDocs, doc, setDoc, deleteDoc);
+                    name.value = "";
+                    email.value = "";
+                });
+        })
+    }
+
+    mAccountantList = await fetchAccountants(db, org.id, collection, getDocs);
+    setupAccountantsLi(db, org.id, collection, getDocs, doc, setDoc, deleteDoc);
 
     window.addEventListener("click", (event) => {
-
         // Check if user clicks on anything that should close the edit_user-box dialog
         const editRatesDialog = document.getElementById("edit_rate_dialog");
-        const ratesListItems = document.querySelectorAll('.timesheet-list-item');
+        const editAccountantDialog = document.getElementById("edit_accountant_dialog");
+        const listItems = document.querySelectorAll('.timesheet-list-item');
 
         // Check if the click was outside the dialog
         if (
-            editRatesDialog && 
-            !editRatesDialog.contains(event.target) && 
-            !Array.from(ratesListItems).includes(event.target) &&
-            event.target.id != "edit-rate-form-btn"
+            editRatesDialog && editAccountantDialog &&
+            !editRatesDialog.contains(event.target) && !editAccountantDialog.contains(event.target)  &&
+            !Array.from(listItems).includes(event.target) &&
+            event.target.id != "edit-rate-form-btn" && event.target.id != "edit-accountant-form-btn"
         ) {
             editRatesDialog.style.display = "none";
+            editAccountantDialog.style.display = "none";
         }
     });
 }
 
+// Add or update current organization
 async function updateOrg(db, addDoc, doc, getDoc, setDoc, collection, org) {
     try {
         if(org.id == undefined){
@@ -97,6 +120,8 @@ async function updateOrg(db, addDoc, doc, getDoc, setDoc, collection, org) {
     }
 }
 
+
+// Rate helper functions
 async function saveRate(db, addDoc, collection, organizationId, rate) {
     try {
         // Create a reference to the rates collection for the organization
@@ -149,13 +174,13 @@ function createRateListItem(rate, doc, setDoc, deleteDoc, db, organizationId){
     rateItem.addEventListener('click', (e)=>{
         e.preventDefault();
 
-        const editRateDialog = document.getElementById("edit_rate_dialog")
+        const editRateDialog = document.getElementById("edit_rate_dialog");
         editRateDialog.style.display = "block";
 
         const rateField = document.getElementById("edit-rate-name-field");
         rateField.value = rate.description;
 
-        const editRateForm = document.getElementById("edit-rate-form")
+        const editRateForm = document.getElementById("edit-rate-form");
         editRateForm.addEventListener('submit', async(e) =>{
             e.preventDefault();
 
@@ -181,7 +206,7 @@ function createRateListItem(rate, doc, setDoc, deleteDoc, db, organizationId){
 
             editRateDialog.style.display = "none";
         })
-    })
+    });
     
     return rateItem;
 }
@@ -232,5 +257,153 @@ async function deleteRate(db, doc, deleteDoc, organizationId, rateId) {
         return { id: rateId, description: undefined };
     } catch (error) {
         return { success: false, message: 'Error deleting rate.' };
+    }
+}
+
+
+// Accountant functions
+async function saveAccountant(db, addDoc, collection, organizationId, accountant) {
+    try {
+        // Create a reference to the accountants collection for the organization
+        const accountantsCollectionRef = collection(db, `organizations/${organizationId}/accountants`);
+
+        // Save the accountant in Firestore with an auto-generated ID
+        const docRef = await addDoc(accountantsCollectionRef, accountant);
+
+        return { id: docRef.id, ...accountant }; // Return the saved accountant with its ID
+    } catch (error) {
+        console.error('Error saving accountant:', error);
+        return { success: false, message: 'Error saving accountant.' };
+    }
+}
+
+async function fetchAccountants(db, organizationId, collection, getDocs) {
+    try {
+        // Create a reference to the accountants collection for the organization
+        const accountantsCollectionRef = collection(db, `organizations/${organizationId}/accountants`);
+
+        // Fetch all accountants from Firestore
+        const accountantsSnapshot = await getDocs(accountantsCollectionRef);
+        const accountants = accountantsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return accountants;
+    } catch (error) {
+        console.error('Error fetching accountants:', error);
+        return []; // Return an empty array on error
+    }
+}
+
+async function updateAccountant(db, doc, setDoc, organizationId, accountantId, updatedAccountant) {
+    try {
+        // Create a reference to the accountant document
+        const accountantDocRef = doc(db, `organizations/${organizationId}/accountants/${accountantId}`);
+
+        // Update the accountant in Firestore
+        await setDoc(accountantDocRef, updatedAccountant, { merge: true });
+
+        // Return the updated accountant
+        return updatedAccountant;
+    } catch (error) {
+        console.error('Error updating accountant:', error);
+        return { success: false, message: 'Error updating accountant.' };
+    }
+}
+
+async function setupAccountantsLi(db, organizationId, collection, getDocs, doc, setDoc, deleteDoc) {
+    const accountantsList = document.getElementById('accountant_list');
+
+    const accountants = await fetchAccountants(db, organizationId, collection, getDocs);
+
+    accountantsList.innerHTML = ''; // Clear existing list
+    if (accountants.length !== 0) {
+        document.getElementById('no-accountants-p').style.display = 'none';
+        accountants.forEach(accountant => {
+            const listItem = createAccountantListItem(accountant, doc, setDoc, deleteDoc, collection, getDocs, db, organizationId);
+            accountantsList.appendChild(listItem);
+        });
+    } else {
+        document.getElementById('no-accountants-p').style.display = 'block';
+    }
+}
+
+function createAccountantListItem(accountant, doc, setDoc, deleteDoc, collection, getDocs, db, organizationId) {
+    const listItem = document.createElement('li');
+    listItem.textContent = `${accountant.name} (${accountant.email})`; // Customize the display text
+    listItem.classList.add('timesheet-list-item'); // Add a class for styling
+
+    listItem.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        const editAccountantDialog = document.getElementById("edit_accountant_dialog");
+        editAccountantDialog.style.display = "block";
+
+        const accountantName = document.getElementById("edit-accountant-name-field");
+        accountantName.value = accountant.name;
+
+        const accountantEmail = document.getElementById("edit-accountant-email-field");
+        accountantEmail.value = accountant.email;
+
+        const editAccountantForm = document.getElementById("edit-accountant-form");
+        editAccountantForm.addEventListener('submit', async(e) => {
+            e.preventDefault();
+
+            const accountantId = accountant.id;
+            accountant.name = accountantName.value;
+            accountant.email = accountantEmail.value;
+
+            const newAccountant = await updateAccountant(db, doc, setDoc, organizationId, accountantId, accountant);
+            mAccountantList = updateAccountList(mAccountantList, newAccountant, false);
+            setupAccountantsLi(db, organizationId, collection, getDocs, doc, setDoc, deleteDoc);
+
+            editAccountantDialog.style.display = "none";
+        })
+
+        const deleteAccountantBtn = document.getElementById("delete-accountant-form-btn");
+        deleteAccountantBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            const accountantId = accountant.id;
+            await deleteAccountant(db, doc, deleteDoc, organizationId, accountantId);
+            const accountantToDelete = {id: accountantId, name: undefined, email: undefined};
+            mAccountantList = updateAccountList(mAccountantList, accountantToDelete, true);
+            setupAccountantsLi(db, organizationId, collection, getDocs, doc, setDoc, deleteDoc);
+
+            editAccountantDialog.style.display = "none";
+        })
+    });
+
+    return listItem;
+}
+
+function updateAccountList(accountantsList, accountant, shouldDelete) {
+    if (shouldDelete) {
+        // Remove the accountant from the list
+        return accountantsList.filter(existingAccountant => existingAccountant.id !== accountant.id);
+    } else {
+        // Check if the accountant already exists in the list
+        const existingAccountantIndex = accountantsList.findIndex(existingAccountant => existingAccountant.id === accountant.id);
+
+        if (existingAccountantIndex !== -1) {
+            // Update the existing accountant
+            accountantsList[existingAccountantIndex] = accountant;
+        } else {
+            // Add the new accountant to the list
+            accountantsList.push(accountant);
+        }
+        return accountantsList;
+    }
+}
+
+async function deleteAccountant(db, doc, deleteDoc, organizationId, accountantId) {
+    try {
+        // Create a reference to the accountant document
+        const accountantDocRef = doc(db, `organizations/${organizationId}/accountants/${accountantId}`);
+
+        // Use deleteDoc to remove the accountant document
+        await deleteDoc(accountantDocRef);
+
+        return { id: accountantId, success: true }; // Return success message
+    } catch (error) {
+        console.error('Error deleting accountant:', error);
+        return { success: false, message: 'Error deleting accountant.' };
     }
 }
