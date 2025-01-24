@@ -137,7 +137,7 @@ async function loadPage(
     const response = await fetch("html/organization-details.html");
     const html = await response.text();
     content.innerHTML = html
-    await setupOrganizationForm(db, addDoc, doc, getDoc, getDocs, setDoc, collection, mOrganization, updateOrganizationData);
+    await setupOrganizationForm(db, addDoc, doc, getDoc, getDocs, setDoc, deleteDoc, collection, mOrganization, updateOrganizationData);
   }
 
   // Load Employee Hours screen

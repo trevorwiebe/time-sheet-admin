@@ -322,6 +322,10 @@ ul{
   border: solid red;
 }
 
+.secondary_btn:hover{
+  background-color: var(--background);
+}
+
 #delete-user-btn:hover{
   background-color: white;
 }
@@ -380,6 +384,10 @@ ul{
   display: none;
   border-radius: 6px;
   box-shadow: 0px 0px 100px var(--secondary);;
+}
+
+#no-rates-p{
+  text-align: center;
 }
 
 /* Extra small devices (phones, 600px and down) */

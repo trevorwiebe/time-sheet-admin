@@ -1,6 +1,6 @@
 let mRateList = ""
 
-export async function setupOrganizationForm(db, addDoc, doc, getDoc, getDocs, setDoc, collection, org, updateCallback) {
+export async function setupOrganizationForm(db, addDoc, doc, getDoc, getDocs, setDoc, deleteDoc, collection, org, updateCallback) {
     
     // Edit organization
     const form = document.getElementById("org-form");
@@ -33,7 +33,7 @@ export async function setupOrganizationForm(db, addDoc, doc, getDoc, getDocs, se
 
     // Fetch any available rates
     mRateList = await fetchRates(db, org.id, collection, getDocs);
-    setupRatesLi(doc, setDoc, db, org.id)
+    setupRatesLi(doc, setDoc, deleteDoc, db, org.id)
 
     // Add or edit rates
     const rateForm = document.getElementById('new-rate-form');
@@ -45,17 +45,20 @@ export async function setupOrganizationForm(db, addDoc, doc, getDoc, getDocs, se
             // Call the saveRate function
             await saveRate(db, addDoc, collection, org.id, rateName.value)
                 .then((rate) => {
-                    mRateList = updateRatesList(mRateList, rateName, false);
-                    setupRatesLi(doc, setDoc, db, org.id)
+                    mRateList = updateRatesList(mRateList, rate, false);
+                    setupRatesLi(doc, setDoc, deleteDoc, db, org.id);
+                    rateName.value = "";
                 })
         });
     }
 
 
-    // Check if user clicks on anything that should close the edit_user-box dialog
-    const editRatesDialog = document.getElementById("edit_rate_dialog");
-    const ratesListItems = document.querySelectorAll('.timesheet-list-item');
     window.addEventListener("click", (event) => {
+
+        // Check if user clicks on anything that should close the edit_user-box dialog
+        const editRatesDialog = document.getElementById("edit_rate_dialog");
+        const ratesListItems = document.querySelectorAll('.timesheet-list-item');
+
         // Check if the click was outside the dialog
         if (
             editRatesDialog && 
@@ -124,18 +127,21 @@ async function fetchRates(db, organizationId, collection, getDocs) {
     }
 }
 
-function setupRatesLi(doc, setDoc, db, orgId){
+function setupRatesLi(doc, setDoc, deleteDoc, db, orgId){
     const rateList = document.getElementById("rates_list");
     rateList.innerHTML = '';
     if(mRateList.length !== 0){
+        document.getElementById("no-rates-p").style.display = "none";
         mRateList.forEach(rate => {
-            const rateListItem = createRateListItem(rate, doc, setDoc, db, orgId);
+            const rateListItem = createRateListItem(rate, doc, setDoc, deleteDoc, db, orgId);
             rateList.appendChild(rateListItem);
         })
+    }else{
+        document.getElementById("no-rates-p").style.display = "block";
     }
 }
 
-function createRateListItem(rate, doc, setDoc, db, organizationId){
+function createRateListItem(rate, doc, setDoc, deleteDoc, db, organizationId){
     const rateItem = document.createElement('li');
     rateItem.textContent = rate.description;
     rateItem.classList.add('timesheet-list-item');
@@ -158,7 +164,20 @@ function createRateListItem(rate, doc, setDoc, db, organizationId){
             rate.description = rateField.value;
             const newRate = await updateRate(db, doc, setDoc, organizationId, rateId, rate);
             mRateList = updateRatesList(mRateList, newRate, false);
-            setupRatesLi(doc, setDoc, db, organizationId)
+            setupRatesLi(doc, setDoc, deleteDoc, db, organizationId);
+
+            editRateDialog.style.display = "none";
+        })
+
+        const deleteRateBtn = document.getElementById('delete-rate-form-btn');
+        deleteRateBtn.addEventListener('click', async (e)=>{
+            e.preventDefault();
+
+            const rateId = rate.id;
+            const deletedRate = await deleteRate(db, doc, deleteDoc, organizationId, rateId);
+
+            mRateList = updateRatesList(mRateList, deletedRate, true);
+            setupRatesLi(doc, setDoc, deleteDoc, db, organizationId);
 
             editRateDialog.style.display = "none";
         })
@@ -199,5 +218,19 @@ function updateRatesList(ratesList, rate, shouldDelete) {
             ratesList.push(rate);
         }
         return ratesList;
+    }
+}
+
+async function deleteRate(db, doc, deleteDoc, organizationId, rateId) {
+    try {
+        // Create a reference to the rate document
+        const rateDocRef = doc(db, `organizations/${organizationId}/rates/${rateId}`);
+
+        // Delete the rate from Firestore
+        await deleteDoc(rateDocRef);
+
+        return { id: rateId, description: undefined };
+    } catch (error) {
+        return { success: false, message: 'Error deleting rate.' };
     }
 }
