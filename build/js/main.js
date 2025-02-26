@@ -52,9 +52,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const auth = getAuth();
   const functions = getFunctions(app);
 
-  connectFirestoreEmulator(db, 'localhost', 8080);
-  connectAuthEmulator(auth, 'http://localhost:9099');
-  connectFunctionsEmulator(functions, 'localhost', 5001);
+  const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '1';
+   
+   if (isDevelopment) {
+       connectFirestoreEmulator(db, 'localhost', 8080);
+       connectAuthEmulator(auth, 'http://localhost:9099');
+       connectFunctionsEmulator(functions, 'localhost', 5001);
+   }
 
   const menuLinks = document.querySelectorAll(".menu a");
 
