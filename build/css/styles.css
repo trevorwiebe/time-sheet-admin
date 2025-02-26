@@ -188,6 +188,22 @@ button:hover {
   font-weight: bold;
 }
 
+#organization-dialog-container{
+  margin-top: 100px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+#organization-dialog{
+  background-color: white;
+  padding: 2rem;
+  border-radius: 6px;
+  width: 50%;
+  z-index: 5;
+}
+
 /* User Management */
 .checkbox-container {
   display: flex;

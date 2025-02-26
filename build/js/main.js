@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const auth = getAuth();
   const functions = getFunctions(app);
 
-  const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '1';
+  const isDevelopment = window.location.hostname === "127.0.0.1";
    
    if (isDevelopment) {
        connectFirestoreEmulator(db, 'localhost', 8080);
@@ -88,15 +88,48 @@ document.addEventListener("DOMContentLoaded", () => {
       if(mUserOrgId != null){
         // Fetch organization and users
         await fetchAllData(db, mUserOrgId, getDoc, getDocs);
-      }else{
-        console.log("User credential is null");
-      }
 
-      loadPage("user-management", db, 
-        auth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
-        doc, setDoc, getDoc, getDocs, addDoc, collection, deleteDoc,
-        functions, httpsCallable
-      );
+        loadPage("user-management", db, 
+          auth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
+          doc, setDoc, getDoc, getDocs, addDoc, collection, deleteDoc,
+          functions, httpsCallable
+        );
+      }else{
+        const organizations = await fetchOrganizations(db);
+        showOrganizationDialog(organizations, db, async (selectedOrg) => {
+          mUserOrgId = selectedOrg.id; // Set the selected organization ID
+          
+          // Set user's custom claim here
+          const setClaims = httpsCallable(functions, 'setCustomClaims');
+          await setClaims({ uid: user.uid, organizationId: mUserOrgId });
+
+          const today = new Date();
+          const formattedDate = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear() % 100}`;
+
+          // New user
+          const newUser = {
+            name: user.displayName,
+            email: user.email,
+            availablePTO: 0,
+            hireDate: formattedDate,
+            organizationId: mUserOrgId,
+            adminAccess: true
+          };
+
+          // Create a reference to the document using the userId
+          const userDocRef = doc(db, `organizations/${mUserOrgId}/users/${user.uid}`);
+          // Use setDoc to save the user data under the userId
+          await setDoc(userDocRef, newUser);
+
+          // finish fetching data
+          await fetchAllData(db, mUserOrgId, getDoc, getDocs);
+          loadPage("user-management", db, 
+            auth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
+            doc, setDoc, getDoc, getDocs, addDoc, collection, deleteDoc,
+            functions, httpsCallable
+          );
+        })
+      }
     } else {
       // User is signed out
       showSignInScreen(auth);
@@ -173,6 +206,67 @@ async function fetchAllData(db, organizationId, getDoc, getDocs) {
   } catch (error) {
       console.error('Error fetching organization and users:', error);
       return { organization: null, users: [] }; // Return default values on error
+  }
+}
+
+async function fetchOrganizations(db) {
+  const orgsSnapshot = await getDocs(collection(db, 'organizations'));
+  return orgsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+}
+
+function showOrganizationDialog(organizations, db, onSelect) {
+  const dialog = document.getElementById('organization-dialog');
+  const orgList = document.getElementById('organization-list');
+  orgList.innerHTML = ''; // Clear existing list
+
+  const shadowDiv = document.getElementById("shadow");
+  shadowDiv.style.display = "block";
+
+  organizations.forEach(org => {
+      const listItem = document.createElement('li');
+      listItem.textContent = org.name;
+      listItem.classList.add('timesheet-list-item'); // Add a class for styling
+      listItem.addEventListener('click', async () => {
+
+        shadowDiv.style.display = "none";
+        dialog.style.display = 'none';
+        onSelect(org); // Call the callback with the selected organization         
+      });
+      orgList.appendChild(listItem);
+  });
+
+  dialog.style.display = 'block'; // Show the dialog
+
+
+  const orgForm = document.getElementById("org-form");
+  const name = document.getElementById("org-name-field");
+  const payPeriodDOWStart = document.getElementById("day-selector");
+  const payPeriodDuration = document.getElementById("payperiod-value");
+  const payperiodUnit = document.getElementById("unit-selector");
+
+  name.value = "";
+  payPeriodDOWStart.value = "Monday";
+  payPeriodDuration.value = "2";
+  payperiodUnit.value = "week";
+
+  if (orgForm) {
+    orgForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const newOrg = {
+          name: name.value,
+          payPeriodDOWStart: payPeriodDOWStart.value,
+          payPeriodDuration: payPeriodDuration.value,
+          payperiodUnit: payperiodUnit.value
+      };
+
+      const orgDocRef = await addDoc(collection(db, 'organizations'), newOrg);
+      const orgId = orgDocRef.id;
+      newOrg.id = orgId;
+
+      shadowDiv.style.display = "none";
+      dialog.style.display = 'none';
+      onSelect(newOrg)
+    });
   }
 }
 
@@ -288,6 +382,44 @@ const signInHTML = `
         <p id="sign_in_error"></p>
         <button id="signin_button" type="submit">Sign In</button>
         </form>
+      </div>
+    </div>
+    <div id="organization-dialog-container">
+      <div id="organization-dialog" style="display:none;">
+        <h3>Select Your Organization</h3>
+        <ul id="organization-list"></ul>
+        <p>Or add a new organization</p>
+        <form id="org-form">
+          <div class="form-group">
+              <label for="org-name-field">Organization Name</label>
+              <input type="text" id="org-name-field" name="org-name-field" placeholder="Organization name" required>
+          </div>
+          <div class="form-group">
+              <label for="day-selector">Day of week pay period starts</label>
+              <select id="day-selector" class="custom-selector">
+                  <option value="Monday">Monday</option>
+                  <option value="Tuesday">Tuesday</option>
+                  <option value="Wednesday">Wednesday</option>
+                  <option value="Thursday">Thursday</option>
+                  <option value="Friday">Friday</option>
+                  <option value="Saturday">Saturday</option>
+                  <option value="Sunday">Sunday</option>
+              </select>
+          </div>
+          <div class="form-group">
+              <label for="payperiod-value">Pay period duration</label>
+              <input type="number" id="payperiod-value" placeholder="Enter number">
+              <select id="unit-selector" class="custom-selector">
+                  <option value="day">Day</option>
+                  <option value="week">Week</option>
+                  <option value="month">Month</option>
+              </select>
+          </div>
+          <button id="org-form-btn" type="submit">Save</button>
+          <div class="update_success_box" id="update_success_box">
+              <p id="message" class="message"></p>
+          </div>
+      </form>
       </div>
     </div>
 `
