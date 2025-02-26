@@ -121,13 +121,8 @@ document.addEventListener("DOMContentLoaded", () => {
           // Use setDoc to save the user data under the userId
           await setDoc(userDocRef, newUser);
 
-          // finish fetching data
-          await fetchAllData(db, mUserOrgId, getDoc, getDocs);
-          loadPage("user-management", db, 
-            auth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
-            doc, setDoc, getDoc, getDocs, addDoc, collection, deleteDoc,
-            functions, httpsCallable
-          );
+          // update refresh token after setting user and custom claims
+          updateRefreshToken(auth);
         })
       }
     } else {
@@ -217,6 +212,9 @@ async function fetchOrganizations(db) {
 function showOrganizationDialog(organizations, db, onSelect) {
   const dialog = document.getElementById('organization-dialog');
   const orgList = document.getElementById('organization-list');
+
+  if(!dialog || !orgList) return;
+
   orgList.innerHTML = ''; // Clear existing list
 
   const shadowDiv = document.getElementById("shadow");
@@ -363,6 +361,23 @@ function updateUserList(updatedUser){
   } else {
       // Add new user
       mUsers.push(updatedUser);
+  }
+}
+
+// This is necessary to update current user refresh token after customClaims for any user are edited for some reason
+async function updateRefreshToken(auth) {
+  const currentUser = auth.currentUser;
+  // Refresh the token for the signed-in user
+  if (currentUser) {
+      try {
+          await currentUser.getIdToken(true);
+          // reload page to refresh data
+          location.reload();
+      } catch (error) {
+          console.error('Error refreshing token:', error);
+      }
+  } else {
+      console.log('No user is currently signed in.');
   }
 }
 
