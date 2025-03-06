@@ -30,3 +30,32 @@ export function isoToHtmlDateFormat(isoString) {
   
   return `${year}-${month}-${day}`;
 }
+
+export function calculatePayPeriodStartDate(goLiveDate, currentDate) {
+  // Convert both dates to milliseconds for calculation
+  const goLiveDateMs = new Date(goLiveDate).getTime();
+  const currentDateMs = new Date(currentDate).getTime();
+  
+  // Calculate elapsed time in days
+  const elapsedTimeMs = currentDateMs - goLiveDateMs;
+  const elapsedDays = Math.floor(elapsedTimeMs / (1000 * 60 * 60 * 24));
+  
+  // Calculate days into the new pay period (mod 14)
+  const daysIntoNewPayPeriod = elapsedDays % 14;
+  
+  // Convert days to hours
+  const hoursToSubtract = daysIntoNewPayPeriod * 24;
+  
+  // Calculate pay period start date by subtracting the hours
+  const payPeriodStartDate = new Date(currentDateMs - (hoursToSubtract * 60 * 60 * 1000));
+  
+  return payPeriodStartDate;
+}
+
+export function formatDate(date) {
+  const month = date.getMonth() + 1; // getMonth() returns 0-11
+  const day = date.getDate();
+  const year = date.getFullYear();
+  
+  return `${month}/${day}/${year}`;
+}

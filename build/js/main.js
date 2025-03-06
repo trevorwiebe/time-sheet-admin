@@ -7,7 +7,9 @@ import {
   getDoc, getDocs, deleteDoc,
   collection, 
   addDoc, 
-  connectFirestoreEmulator 
+  connectFirestoreEmulator,
+  query,
+  where
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 import { 
   getAuth, 
@@ -179,7 +181,7 @@ async function loadPage(
     const response = await fetch("html/employee-hours.html");
     const html = await response.text();
     content.innerHTML = html
-    loadUsers(mUsers);
+    loadUsers(db, mOrganization, getDocs, collection, query, where, mUsers);
   }
 
   // Load Approve Time Off screen
