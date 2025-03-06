@@ -413,9 +413,53 @@ ul{
 #current-pay-period{
   margin-left: 10px;
   margin-right: 10px;
+  margin-top: 0px;
+  margin-bottom: 0px;
   font-weight: bold;
 }
 
+.employee-details {
+  margin-top: 16px;
+  margin-bottom: 16px;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  border: 1px solid var(--tiertiary);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  align-items: center;
+}
+
+.employee-details:hover {
+  background-color: #f4f4f4;
+  box-shadow: 0px 0px 2px #3b3b3b;
+}
+
+.employee-name{
+  padding-left: 10px;
+  padding-right: 10px;
+  width: 30%;
+}
+
+.hours-worked{
+  padding-left: 10px;
+  padding-right: 10px;
+  width: 30%;
+}
+
+.status-cards {
+  margin: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  width: 25%;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-card {
+  margin: 8px;
+}
 
 /* Media Queries */
 

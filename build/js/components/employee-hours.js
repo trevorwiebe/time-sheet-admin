@@ -12,8 +12,13 @@ export function loadUsers(
     userList.innerHTML = ''; // Clear existing list
     if(users.length !== 0){
       users.forEach(user => {
-          const listItem = createUserListItem(user);
-          userList.appendChild(listItem);
+
+        const totalHours = "45";
+        const statusCards = ["status", "status", "status"];
+
+        // Call liStructure to create the list item
+        const listItem = liStructure(user.name, totalHours, statusCards);
+        userList.appendChild(listItem);
       });
       emptyListNote.style.display = "none";
     }else{
@@ -44,18 +49,6 @@ export function loadUsers(
 
 }
 
-function createUserListItem(user) {
-  const listItem = document.createElement('li');
-  listItem.textContent = `${user.name} \n\n(${user.email})`; // Customize the display text
-  listItem.classList.add('timesheet-list-item'); // Add a class for styling
-
-  listItem.addEventListener('click', () => {
-
-  });
-
-  return listItem;
-}
-
 async function getAllEmployeePunches(db, organizationId, getDocs, collection, query, where, startDate, endDate) {
   const usersSnapshot = await getDocs(collection(db, `organizations/${organizationId}/users`));
   const punchesData = {};
@@ -81,3 +74,43 @@ async function getAllEmployeePunches(db, organizationId, getDocs, collection, qu
 
   return punchesData;
 }
+
+function liStructure(name, totalHours, statusCards) {
+  // Create a div for the employee details
+  const employeeDiv = document.createElement('div');
+  employeeDiv.classList.add('employee-details'); // Add a class for styling
+
+  // Create the employee name and total hours worked
+  const nameElement = document.createElement('h4');
+  nameElement.classList.add('employee-name'); // Add a class for styling
+  nameElement.textContent = name;
+
+  const hoursElement = document.createElement('p');
+  hoursElement.classList.add('hours-worked'); // Add a class for styling
+  hoursElement.textContent = `Hours Worked: ${totalHours}`;
+
+  // Append name and hours to the employee div
+  employeeDiv.appendChild(nameElement);
+  employeeDiv.appendChild(hoursElement);
+
+  // Create a div for status cards
+  const statusContainer = document.createElement('div');
+  statusContainer.classList.add('status-cards');
+
+  // Create status cards
+  statusCards.forEach(status => {
+      const statusCard = document.createElement('div');
+      statusCard.classList.add('status-card');
+      statusCard.textContent = status; // Assuming status is a string
+      statusContainer.appendChild(statusCard);
+  });
+
+  // Append status cards to the employee div
+  employeeDiv.appendChild(statusContainer);
+
+  // Add a class to the main employee div for styling
+  employeeDiv.classList.add('employee-list-item'); // New class for styling
+
+  return employeeDiv;
+}
+ 
