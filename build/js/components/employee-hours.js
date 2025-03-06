@@ -2,22 +2,24 @@ import { calculatePayPeriodStartDate, formatDate} from "../utils/utils.js";
 
 export function loadUsers(
   db, org, getDocs, collection, query, where,
-  users,
+  users, rateList
 ) {
   const userList = document.getElementById("user-list");
 
   // Function to render the user list
-  function renderUserList(users) {
+  function renderUserList(users, punchData) {
     const emptyListNote = document.getElementById("empty_user_list");
     userList.innerHTML = ''; // Clear existing list
     if(users.length !== 0){
       users.forEach(user => {
 
-        const totalHours = "45";
+        const punches = punchData[user.id].punches;
+        const rateHours = calculateTotalHours(punches);
+
         const statusCards = ["status", "status", "status"];
 
         // Call liStructure to create the list item
-        const listItem = liStructure(user.name, totalHours, statusCards);
+        const listItem = liStructure(user.name, rateHours, rateList, statusCards);
         userList.appendChild(listItem);
       });
       emptyListNote.style.display = "none";
@@ -26,26 +28,28 @@ export function loadUsers(
     }
   }
 
-  renderUserList(users);
+  const date = new Date();
+  const todayAtStart = new Date(date);
+  todayAtStart.setHours(0, 0, 0, 0);
+  
+  const todayAtEnd = new Date(date);
+  todayAtEnd.setHours(23, 59, 59, 999);
+  
+  const payPeriodStart = calculatePayPeriodStartDate(org.goLiveDate, todayAtStart);
+  const payPeriodEnd = todayAtEnd;
+  
+  const isoStartDate = payPeriodStart.toISOString();
+  const isoEndDate = payPeriodEnd.toISOString();
 
-  const todaysDate = new Date()
-  todaysDate.setHours(0, 0, 0, 0);
-  const startDate = calculatePayPeriodStartDate(org.goLiveDate, todaysDate);
-  const endDate = new Date(startDate);
-  endDate.setDate(startDate.getDate() + 14);
-
-  const isoStartDate = startDate.toISOString();
-  const isoTodaysDate = todaysDate.toISOString();
-
-  getAllEmployeePunches(db, org.id, getDocs, collection, query, where, isoStartDate, isoTodaysDate)
-    .then(punchesData => {
-      console.log(punchesData);
+  getAllEmployeePunches(db, org.id, getDocs, collection, query, where, isoStartDate, isoEndDate)
+    .then(punchData => {
+      renderUserList(users, punchData);
     });
 
 
   // Current pay period
   const payPeriodText = document.getElementById("current-pay-period");
-  payPeriodText.textContent = `Current Pay Period: ${formatDate(startDate)} - ${formatDate(endDate)}`;
+  payPeriodText.textContent = `Current Pay Period: ${formatDate(payPeriodStart)} - ${formatDate(payPeriodEnd)}`;
 
 }
 
@@ -75,23 +79,32 @@ async function getAllEmployeePunches(db, organizationId, getDocs, collection, qu
   return punchesData;
 }
 
-function liStructure(name, totalHours, statusCards) {
+function liStructure(name, totalHours, rateList, statusCards) {
   // Create a div for the employee details
   const employeeDiv = document.createElement('div');
   employeeDiv.classList.add('employee-details'); // Add a class for styling
 
-  // Create the employee name and total hours worked
+  // Create the employee name
   const nameElement = document.createElement('h4');
   nameElement.classList.add('employee-name'); // Add a class for styling
   nameElement.textContent = name;
 
-  const hoursElement = document.createElement('p');
-  hoursElement.classList.add('hours-worked'); // Add a class for styling
-  hoursElement.textContent = `Hours Worked: ${totalHours}`;
+  // Create a div to display total hours by rate
+  const hoursContainer = document.createElement('div');
+  hoursContainer.classList.add('hours-worked'); // Add a class for styling
+
+  // Loop through totalHours and create elements for each rate
+  for (const [rateId, hours] of Object.entries(totalHours)) {
+      const hoursElement = document.createElement('p');
+      hoursElement.classList.add('rate-hours'); // Add a class for styling
+      const rate = rateList.find(rate => rate.id === rateId);
+      hoursElement.textContent = `${rate.description} Hours: ${hours}`;
+      hoursContainer.appendChild(hoursElement);
+  }
 
   // Append name and hours to the employee div
   employeeDiv.appendChild(nameElement);
-  employeeDiv.appendChild(hoursElement);
+  employeeDiv.appendChild(hoursContainer);
 
   // Create a div for status cards
   const statusContainer = document.createElement('div');
@@ -112,5 +125,30 @@ function liStructure(name, totalHours, statusCards) {
   employeeDiv.classList.add('employee-list-item'); // New class for styling
 
   return employeeDiv;
+}
+
+function calculateTotalHours(punches) {
+  const totalHours = {};
+
+  for (let i = 0; i < punches.length; i += 2) {
+    const punch1 = punches[i];
+    const punch2 = punches[i + 1];
+
+    // Assuming each punch represents 1 hour of work
+    const hoursWorked = (punch2 ? 2 : 1); // If there's a second punch, count as 2 hours
+
+    // Use the rateId from the first punch (assuming they are the same for pairs)
+    const rateId = punch1.rateId;
+
+    // Initialize the rateId in the totalHours object if it doesn't exist
+    if (!totalHours[rateId]) {
+        totalHours[rateId] = 0;
+    }
+
+    // Add the hours worked to the corresponding rateId
+    totalHours[rateId] += hoursWorked;
+  }
+
+  return totalHours;
 }
  

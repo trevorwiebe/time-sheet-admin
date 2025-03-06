@@ -429,6 +429,7 @@ ul{
   cursor: pointer;
   transition: background-color 0.2s;
   align-items: center;
+  justify-content: space-between;
 }
 
 .employee-details:hover {
@@ -453,12 +454,17 @@ ul{
   display: flex;
   flex-wrap: wrap;
   width: 25%;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
 }
 
 .status-card {
   margin: 8px;
+}
+
+.rate-hours{
+  margin: 0px;
+  font-size: 14px;
 }
 
 /* Media Queries */

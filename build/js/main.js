@@ -34,6 +34,7 @@ import { convertToISOString } from "./utils/utils.js";
 let mUserOrgId = "";
 let mOrganization = "";
 let mUsers = "";
+let mRates = "";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -181,7 +182,7 @@ async function loadPage(
     const response = await fetch("html/employee-hours.html");
     const html = await response.text();
     content.innerHTML = html
-    loadUsers(db, mOrganization, getDocs, collection, query, where, mUsers);
+    loadUsers(db, mOrganization, getDocs, collection, query, where, mUsers, mRates);
   }
 
   // Load Approve Time Off screen
@@ -203,6 +204,9 @@ async function fetchAllData(db, organizationId, getDoc, getDocs) {
       // Fetch the users for the organization
       const usersSnapshot = await getDocs(collection(db, `organizations/${organizationId}/users`));
       mUsers = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+      const ratesSnapshot = await getDocs(collection(db, `organizations/${organizationId}/rates`));
+      mRates = ratesSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
       console.error('Error fetching organization and users:', error);
       return { organization: null, users: [] }; // Return default values on error
