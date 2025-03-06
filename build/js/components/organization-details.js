@@ -1,7 +1,7 @@
 let mRateList = "";
 let mAccountantList = "";
 
-import { convertToISOString } from "../utils/utils.js";
+import { convertToISOString, isoToHtmlDateFormat} from "../utils/utils.js";
 
 export async function setupOrganizationForm(db, addDoc, doc, getDoc, getDocs, setDoc, deleteDoc, collection, org, updateCallback) {
     
@@ -11,7 +11,7 @@ export async function setupOrganizationForm(db, addDoc, doc, getDoc, getDocs, se
     const goLiveDate = document.getElementById("golive-date");
 
     name.value = org.name || "";
-    goLiveDate.value = org.goLiveDate || "";
+    goLiveDate.value = isoToHtmlDateFormat(org.goLiveDate) || "";
 
     if (form) {
         form.addEventListener("submit", async (event) => {
