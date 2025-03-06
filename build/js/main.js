@@ -240,23 +240,17 @@ function showOrganizationDialog(organizations, db, onSelect) {
 
   const orgForm = document.getElementById("org-form");
   const name = document.getElementById("org-name-field");
-  const payPeriodDOWStart = document.getElementById("day-selector");
-  const payPeriodDuration = document.getElementById("payperiod-value");
-  const payperiodUnit = document.getElementById("unit-selector");
+  const goliveDate = document.getElementById("golive-date");
 
   name.value = "";
-  payPeriodDOWStart.value = "Monday";
-  payPeriodDuration.value = "2";
-  payperiodUnit.value = "week";
+  goliveDate.value = "";
 
   if (orgForm) {
     orgForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       const newOrg = {
           name: name.value,
-          payPeriodDOWStart: payPeriodDOWStart.value,
-          payPeriodDuration: payPeriodDuration.value,
-          payperiodUnit: payperiodUnit.value
+          goLiveDate: goliveDate.value
       };
 
       const orgDocRef = await addDoc(collection(db, 'organizations'), newOrg);
@@ -412,25 +406,8 @@ const signInHTML = `
               <input type="text" id="org-name-field" name="org-name-field" placeholder="Organization name" required>
           </div>
           <div class="form-group">
-              <label for="day-selector">Day of week pay period starts</label>
-              <select id="day-selector" class="custom-selector">
-                  <option value="Monday">Monday</option>
-                  <option value="Tuesday">Tuesday</option>
-                  <option value="Wednesday">Wednesday</option>
-                  <option value="Thursday">Thursday</option>
-                  <option value="Friday">Friday</option>
-                  <option value="Saturday">Saturday</option>
-                  <option value="Sunday">Sunday</option>
-              </select>
-          </div>
-          <div class="form-group">
-              <label for="payperiod-value">Pay period duration</label>
-              <input type="number" id="payperiod-value" placeholder="Enter number">
-              <select id="unit-selector" class="custom-selector">
-                  <option value="day">Day</option>
-                  <option value="week">Week</option>
-                  <option value="month">Month</option>
-              </select>
+              <label for="golive-date">Go Live Date</label>
+              <input type="date" id="golive-date" name="golive-date" required>
           </div>
           <button id="org-form-btn" type="submit">Save</button>
           <div class="update_success_box" id="update_success_box">

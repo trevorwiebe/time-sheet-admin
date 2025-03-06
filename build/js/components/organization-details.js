@@ -6,14 +6,10 @@ export async function setupOrganizationForm(db, addDoc, doc, getDoc, getDocs, se
     // Edit organization
     const form = document.getElementById("org-form");
     const name = document.getElementById("org-name-field");
-    const payPeriodDOWStart = document.getElementById("day-selector");
-    const payPeriodDuration = document.getElementById("payperiod-value");
-    const payperiodUnit = document.getElementById("unit-selector");
+    const goLiveDate = document.getElementById("golive-date");
 
     name.value = org.name || "";
-    payPeriodDOWStart.value = org.payPeriodDOWStart || "Monday";
-    payPeriodDuration.value = org.payPeriodDuration || "2";
-    payperiodUnit.value = org.payperiodUnit || "week";
+    goLiveDate.value = org.goLiveDate || "";
 
     if (form) {
         form.addEventListener("submit", async (event) => {
@@ -21,9 +17,7 @@ export async function setupOrganizationForm(db, addDoc, doc, getDoc, getDocs, se
             const newOrg = {
                 id: org.id,
                 name: name.value,
-                payPeriodDOWStart: payPeriodDOWStart.value,
-                payPeriodDuration: payPeriodDuration.value,
-                payperiodUnit: payperiodUnit.value
+                goLiveDate: goLiveDate.value,
             };
 
             await updateOrg(db, addDoc, doc, getDoc, setDoc, collection, newOrg);
