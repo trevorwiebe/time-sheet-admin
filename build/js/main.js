@@ -27,6 +27,7 @@ import { getFunctions, httpsCallable, connectFunctionsEmulator } from "https://w
 import { loadUserManagement } from "./components/user-management.js";
 import { setupOrganizationForm } from "./components/organization-details.js";
 import { loadUsers } from "./components/employee-hours.js";
+import { convertToISOString } from "./utils/utils.js";
 
 let mUserOrgId = "";
 let mOrganization = "";
@@ -250,7 +251,7 @@ function showOrganizationDialog(organizations, db, onSelect) {
       event.preventDefault();
       const newOrg = {
           name: name.value,
-          goLiveDate: goliveDate.value
+          goLiveDate: convertToISOString(goliveDate.value)
       };
 
       const orgDocRef = await addDoc(collection(db, 'organizations'), newOrg);

@@ -1,6 +1,8 @@
 let mRateList = "";
 let mAccountantList = "";
 
+import { convertToISOString } from "../utils/utils.js";
+
 export async function setupOrganizationForm(db, addDoc, doc, getDoc, getDocs, setDoc, deleteDoc, collection, org, updateCallback) {
     
     // Edit organization
@@ -17,7 +19,7 @@ export async function setupOrganizationForm(db, addDoc, doc, getDoc, getDocs, se
             const newOrg = {
                 id: org.id,
                 name: name.value,
-                goLiveDate: goLiveDate.value,
+                goLiveDate: convertToISOString(goLiveDate.value),
             };
 
             await updateOrg(db, addDoc, doc, getDoc, setDoc, collection, newOrg);
