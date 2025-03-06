@@ -26,6 +26,7 @@ import { getFunctions, httpsCallable, connectFunctionsEmulator } from "https://w
 
 import { loadUserManagement } from "./components/user-management.js";
 import { setupOrganizationForm } from "./components/organization-details.js";
+import { loadUsers } from "./components/employee-hours.js";
 
 let mUserOrgId = "";
 let mOrganization = "";
@@ -177,6 +178,7 @@ async function loadPage(
     const response = await fetch("html/employee-hours.html");
     const html = await response.text();
     content.innerHTML = html
+    loadUsers(mUsers);
   }
 
   // Load Approve Time Off screen
