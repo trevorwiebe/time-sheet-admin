@@ -4,6 +4,10 @@
   --tiertiary: #0C0A3E;
   --tiertiary_hover: #26236b;
   --background: #ffffff;
+  --backgroundRed: #EF9A9A;
+  --red: #B71C1C;
+  --backgroundGreen: #A5D6A7;
+  --green: #1B5E20
 }
 
 html, body{
@@ -440,20 +444,20 @@ ul{
 .employee-name{
   padding-left: 10px;
   padding-right: 10px;
-  width: 30%;
+  width: 20%;
 }
 
 .hours-worked{
   padding-left: 10px;
   padding-right: 10px;
-  width: 30%;
+  width: 20%;
 }
 
 .status-cards {
   margin: 8px;
   display: flex;
   flex-wrap: wrap;
-  width: 25%;
+  width: 20%;
   justify-content: flex-end;
   align-items: center;
 }
@@ -465,6 +469,32 @@ ul{
 .rate-hours{
   margin: 0px;
   font-size: 14px;
+}
+
+.pay-period-text{
+  margin: 0px;
+  font-size: 14px;
+}
+
+.pay_period_conf_state{
+  margin: 10px;
+  font-size: 14px;
+}
+
+.confirmed {
+  color: var(--green);
+  background-color: var(--backgroundGreen);
+  padding: 5px;
+  border-radius: 4px;
+  margin: 5px;
+}
+
+.unconfirmed {
+  color: var(--red);
+  background-color: var(--backgroundRed);
+  padding: 5px;
+  border-radius: 4px;
+  margin: 5px;
 }
 
 /* Media Queries */

@@ -7,19 +7,18 @@ export function loadUsers(
   const userList = document.getElementById("user-list");
 
   // Function to render the user list
-  function renderUserList(users, punchData) {
+  function renderUserList(users, punchData, timeSheetData) {
     const emptyListNote = document.getElementById("empty_user_list");
     userList.innerHTML = ''; // Clear existing list
     if(users.length !== 0){
       users.forEach(user => {
-
         const punches = punchData[user.id].punches;
         const rateHours = calculateTotalHours(punches);
-
-        const statusCards = ["status", "status", "status"];
+        const timeSheets = timeSheetData[user.id];
+        console.log(timeSheets.currentTimeSheet);
 
         // Call liStructure to create the list item
-        const listItem = liStructure(user.name, rateHours, rateList, statusCards);
+        const listItem = liStructure(user.name, [], rateHours, rateList, timeSheets.previousTimeSheet, timeSheets.currentTimeSheet);
         userList.appendChild(listItem);
       });
       emptyListNote.style.display = "none";
@@ -33,15 +32,12 @@ export function loadUsers(
   const currentPayPeriodISOStart = relevantPayPeriods.currentPeriod.isoStartDate;
   const currentPayPeriodISOEnd = relevantPayPeriods.currentPeriod.isoEndDate;
 
-  getAllEmployeePunches(db, org.id, getDocs, collection, query, where, currentPayPeriodISOStart, currentPayPeriodISOEnd)
-    .then(punchData => {
-      renderUserList(users, punchData);
-    });
-
-  // Retrieve the last two timesheets for each user
-  getLastTwoTimesheetsForUsers(db, org.id).then(timesheetsData => {
-    console.log(timesheetsData);
-    // You can use the timesheetsData object as needed
+  // Chain the asynchronous operations
+  Promise.all([
+    getAllEmployeePunches(db, org.id, getDocs, collection, query, where, currentPayPeriodISOStart, currentPayPeriodISOEnd),
+    getLastTwoTimesheetsForUsers(db, org.id)
+  ]).then(([punchData, timesheetsData]) => {
+    renderUserList(users, punchData, timesheetsData);
   });
 
   // Current pay period
@@ -84,7 +80,7 @@ async function getAllEmployeePunches(db, organizationId, getDocs, collection, qu
   return punchesData;
 }
 
-function liStructure(name, totalHours, rateList, statusCards) {
+function liStructure(name, previousPayPeriodHours, currentPeriodTotalHours, rateList, previousTimeSheet, currentTimeSheet) {
   // Create a div for the employee details
   const employeeDiv = document.createElement('div');
   employeeDiv.classList.add('employee-details'); // Add a class for styling
@@ -98,8 +94,13 @@ function liStructure(name, totalHours, rateList, statusCards) {
   const hoursContainer = document.createElement('div');
   hoursContainer.classList.add('hours-worked'); // Add a class for styling
 
+  const currentPayPeriodDate = document.createElement('h5');
+  currentPayPeriodDate.textContent = 'Current Pay Period Hours:';
+  currentPayPeriodDate.classList.add('pay-period-text');
+  hoursContainer.appendChild(currentPayPeriodDate);
+
   // Loop through totalHours and create elements for each rate
-  for (const [rateId, hours] of Object.entries(totalHours)) {
+  for (const [rateId, hours] of Object.entries(currentPeriodTotalHours)) {
       const hoursElement = document.createElement('p');
       hoursElement.classList.add('rate-hours'); // Add a class for styling
       const rate = rateList.find(rate => rate.id === rateId);
@@ -107,24 +108,52 @@ function liStructure(name, totalHours, rateList, statusCards) {
       hoursContainer.appendChild(hoursElement);
   }
 
+  const previousHoursContainer = document.createElement('div');
+  previousHoursContainer.classList.add('hours-worked'); // Add a class for styling
+
+  const previousPayPeriodText = document.createElement('h5');
+  previousPayPeriodText.textContent = 'Previous Pay Period Hours:';
+  previousPayPeriodText.classList.add('pay-period-text');
+  previousHoursContainer.appendChild(previousPayPeriodText);
+
+  // Loop through previousPayPeriodHours and create elements for each rate
+  for (const [rateId, hours] of Object.entries(previousPayPeriodHours)) {
+      const hoursElement = document.createElement('p');
+      hoursElement.classList.add('rate-hours'); // Add a class for styling
+      const rate = rateList.find(rate => rate.id === rateId);
+      hoursElement.textContent = `${rate.description} Hours: ${hours}`;
+      previousHoursContainer.appendChild(hoursElement);
+  }
+
   // Append name and hours to the employee div
   employeeDiv.appendChild(nameElement);
   employeeDiv.appendChild(hoursContainer);
+  employeeDiv.appendChild(previousHoursContainer);
 
-  // Create a div for status cards
-  const statusContainer = document.createElement('div');
-  statusContainer.classList.add('status-cards');
+  // Create a div for confirmation status
+  const confirmationContainer = document.createElement('div');
+  confirmationContainer.classList.add('confirmation-status');
 
-  // Create status cards
-  statusCards.forEach(status => {
-      const statusCard = document.createElement('div');
-      statusCard.classList.add('status-card');
-      statusCard.textContent = status; // Assuming status is a string
-      statusContainer.appendChild(statusCard);
-  });
+  // Determine confirmation status
+  const confirmationStatus = document.createElement('div');
+  confirmationStatus.classList.add('confirmation-status-card');
+  if(previousTimeSheet){
+    if (previousTimeSheet.confirmedByUser) {
+      confirmationStatus.textContent = "Confirmed";
+      confirmationStatus.classList.add('confirmed');
+    } else {
+      confirmationStatus.textContent = "Needs to Confirm";
+      confirmationStatus.classList.add('unconfirmed');
+    }
+    confirmationContainer.appendChild(confirmationStatus);
+  }else{
+    confirmationStatus.textContent = "No Previous Time Sheet";
+    confirmationStatus.classList.add('unconfirmed');
+    confirmationContainer.appendChild(confirmationStatus);
+  }
 
-  // Append status cards to the employee div
-  employeeDiv.appendChild(statusContainer);
+  // Append confirmation status to the employee div
+  employeeDiv.appendChild(confirmationContainer);
 
   // Add a class to the main employee div for styling
   employeeDiv.classList.add('employee-list-item'); // New class for styling
