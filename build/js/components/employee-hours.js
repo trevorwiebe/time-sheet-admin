@@ -1,4 +1,4 @@
-import { calculatePayPeriodStartDate, formatDate} from "../utils/utils.js";
+import { calculatePayPeriodStartDate, formatDate, getAllRelevantPayPeriods } from "../utils/utils.js";
 
 export function loadUsers(
   db, org, getDocs, collection, query, where,
@@ -28,29 +28,28 @@ export function loadUsers(
     }
   }
 
-  const date = new Date();
-  const todayAtStart = new Date(date);
-  todayAtStart.setHours(0, 0, 0, 0);
-  
-  const todayAtEnd = new Date(date);
-  todayAtEnd.setHours(23, 59, 59, 999);
-  
-  const payPeriodStart = calculatePayPeriodStartDate(org.goLiveDate, todayAtStart);
-  const payPeriodEnd = todayAtEnd;
-  
-  const isoStartDate = payPeriodStart.toISOString();
-  const isoEndDate = payPeriodEnd.toISOString();
+  const relevantPayPeriods = getAllRelevantPayPeriods(org.goLiveDate);
 
-  getAllEmployeePunches(db, org.id, getDocs, collection, query, where, isoStartDate, isoEndDate)
+  const currentPayPeriodISOStart = relevantPayPeriods.currentPeriod.isoStartDate;
+  const currentPayPeriodISOEnd = relevantPayPeriods.currentPeriod.isoEndDate;
+
+  getAllEmployeePunches(db, org.id, getDocs, collection, query, where, currentPayPeriodISOStart, currentPayPeriodISOEnd)
     .then(punchData => {
       renderUserList(users, punchData);
     });
 
-
   // Current pay period
   const payPeriodText = document.getElementById("current-pay-period");
-  payPeriodText.textContent = `Current Pay Period: ${formatDate(payPeriodStart)} - ${formatDate(payPeriodEnd)}`;
+  payPeriodText.textContent = `Current Pay Period: ${currentPayPeriodISOStart} - ${currentPayPeriodISOEnd}`;
 
+  const previousPayPeriodISOStart = relevantPayPeriods.previousPeriod.isoStartDate;
+  const previousPayPeriodISOEnd = relevantPayPeriods.previousPeriod.isoEndDate;
+
+  // Previous pay period
+  const previousPayPeriodText = document.getElementById("previous-pay-period");
+  previousPayPeriodText.textContent = `Previous Pay Period: 
+    ${previousPayPeriodISOStart} - ${previousPayPeriodISOEnd}
+  `;
 }
 
 async function getAllEmployeePunches(db, organizationId, getDocs, collection, query, where, startDate, endDate) {
