@@ -134,8 +134,11 @@ function calculateTotalHours(punches) {
     const punch1 = punches[i];
     const punch2 = punches[i + 1];
 
-    // Assuming each punch represents 1 hour of work
-    const hoursWorked = (punch2 ? 2 : 1); // If there's a second punch, count as 2 hours
+    const startDate = new Date(punch1.dateTime);
+    const endDate = new Date(punch2.dateTime);
+    const hoursWorked = (endDate - startDate) / (1000 * 60 * 60);
+
+    const hoursWorkedRounded = Math.round(hoursWorked * 100) / 100
 
     // Use the rateId from the first punch (assuming they are the same for pairs)
     const rateId = punch1.rateId;
@@ -146,7 +149,7 @@ function calculateTotalHours(punches) {
     }
 
     // Add the hours worked to the corresponding rateId
-    totalHours[rateId] += hoursWorked;
+    totalHours[rateId] += hoursWorkedRounded;
   }
 
   return totalHours;
