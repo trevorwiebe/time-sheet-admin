@@ -1,3 +1,40 @@
+import { getDocs, collection, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+
+/**
+ * Retrieves the last two timesheet objects for each user.
+ * 
+ * @param {object} db - The Firestore database instance.
+ * @param {string} organizationId - The organization ID.
+ * @returns {object} An object containing the last two timesheet objects for each user.
+ */
+export async function getLastTwoTimesheetsForUsers(db, organizationId) {
+  const usersSnapshot = await getDocs(collection(db, `organizations/${organizationId}/users`));
+  const timesheetsData = {};
+
+  for (const userDoc of usersSnapshot.docs) {
+    const userId = userDoc.id;
+
+    // Create a query to fetch the last two timesheets
+    const timesheetsQuery = query(
+      collection(db, `organizations/${organizationId}/users/${userId}/timeSheets`),
+      orderBy("payPeriodStart", "desc"),
+      limit(2)
+    );
+
+    // Execute the query
+    const timesheetsSnapshot = await getDocs(timesheetsQuery);
+    const timesheets = timesheetsSnapshot.docs.map(timesheetDoc => ({ id: timesheetDoc.id, ...timesheetDoc.data() }));
+
+    // Assign the timesheets to the timesheetsData object
+    timesheetsData[userId] = {
+      previousTimeSheet: timesheets[1] || null,
+      currentTimeSheet: timesheets[0] || null
+    };
+  }
+
+  return timesheetsData;
+}
+
 export function convertToISOString(dateString) {
   // Create a Date object from the input date string
   // Note: The date will be interpreted in the local timezone

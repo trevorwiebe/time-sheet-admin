@@ -1,4 +1,4 @@
-import { calculatePayPeriodStartDate, formatDate, getAllRelevantPayPeriods } from "../utils/utils.js";
+import { getAllRelevantPayPeriods, getLastTwoTimesheetsForUsers } from "../utils/utils.js";
 
 export function loadUsers(
   db, org, getDocs, collection, query, where,
@@ -37,6 +37,12 @@ export function loadUsers(
     .then(punchData => {
       renderUserList(users, punchData);
     });
+
+  // Retrieve the last two timesheets for each user
+  getLastTwoTimesheetsForUsers(db, org.id).then(timesheetsData => {
+    console.log(timesheetsData);
+    // You can use the timesheetsData object as needed
+  });
 
   // Current pay period
   const payPeriodText = document.getElementById("current-pay-period");
@@ -153,4 +159,3 @@ function calculateTotalHours(punches) {
 
   return totalHours;
 }
- 
