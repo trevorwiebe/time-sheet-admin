@@ -161,6 +161,7 @@ exports.manualTimesheetCreation = onRequest(async (req, res) => {
             vacationHours: 0.0,
             holidayHours: 0.0,
             confirmedByUser: false,
+            submitted: false
           };
           await timeSheetRef.add(newTimeSheet);
           console.log(
