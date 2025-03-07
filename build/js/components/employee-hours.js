@@ -163,28 +163,41 @@ function liStructure(name, previousPayPeriodHours, currentPeriodTotalHours, rate
 
 function calculateTotalHours(punches) {
   const totalHours = {};
-
+  
   for (let i = 0; i < punches.length; i += 2) {
     const punch1 = punches[i];
     const punch2 = punches[i + 1];
-
     const startDate = new Date(punch1.dateTime);
     const endDate = new Date(punch2.dateTime);
-    const hoursWorked = (endDate - startDate) / (1000 * 60 * 60);
-
-    const hoursWorkedRounded = Math.round(hoursWorked * 100) / 100
-
-    // Use the rateId from the first punch (assuming they are the same for pairs)
+    
+    // Calculate difference in milliseconds
+    const diffMs = endDate - startDate;
+    
+    // Convert to minutes and truncate to whole minutes (like Kotlin's inWholeMinutes)
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    
+    // Convert minutes to hours
+    const hoursWorked = diffMinutes / 60;
+    
+    // Round to 2 decimal places
+    const hoursWorkedRounded = Math.round(hoursWorked * 100) / 100;
+    
+    // Use the rateId from the first punch
     const rateId = punch1.rateId;
-
+    
     // Initialize the rateId in the totalHours object if it doesn't exist
     if (!totalHours[rateId]) {
-        totalHours[rateId] = 0;
+      totalHours[rateId] = 0;
     }
-
+    
     // Add the hours worked to the corresponding rateId
     totalHours[rateId] += hoursWorkedRounded;
   }
-
+  
+  // Ensure all final values in totalHours are rounded to the nearest hundredth
+  for (const rateId in totalHours) {
+    totalHours[rateId] = Math.round(totalHours[rateId] * 100) / 100;
+  }
+  
   return totalHours;
 }
