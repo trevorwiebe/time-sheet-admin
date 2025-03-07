@@ -8,16 +8,16 @@ export function loadUsers(
 
   // Function to render the user list
   function renderUserList(users, punchData, timeSheetData) {
+    console.log(punchData);
     const emptyListNote = document.getElementById("empty_user_list");
     userList.innerHTML = ''; // Clear existing list
     if(users.length !== 0){
       users.forEach(user => {
-        const punches = punchData[user.id].punches;
-        const rateHours = calculateTotalHours(punches);
+        const userPunchData = punchData[user.id];
         const timeSheets = timeSheetData[user.id];
 
         // Call liStructure to create the list item
-        const listItem = liStructure(user.name, [], rateHours, rateList, timeSheets.previousTimeSheet, timeSheets.currentTimeSheet);
+        const listItem = liStructure(user.name, userPunchData, rateList, timeSheets.previousTimeSheet, timeSheets.currentTimeSheet);
         userList.appendChild(listItem);
       });
       emptyListNote.style.display = "none";
@@ -37,9 +37,12 @@ export function loadUsers(
 
   // Chain the asynchronous operations
   Promise.all([
-    getAllEmployeePunches(db, org.id, getDocs, collection, query, where, previousPayPeriodISOStart, currentPayPeriodISOEnd),
+    getAllEmployeePunches(
+      db, org.id, getDocs, collection, query, where, previousPayPeriodISOStart, currentPayPeriodISOStart, currentPayPeriodISOEnd
+    ),
     getLastTwoTimesheetsForUsers(db, org.id)
   ]).then(([punchData, timesheetsData]) => {
+    console.log(punchData);
     renderUserList(users, punchData, timesheetsData);
   });
 
@@ -54,33 +57,42 @@ export function loadUsers(
   `;
 }
 
-async function getAllEmployeePunches(db, organizationId, getDocs, collection, query, where, startDate, endDate) {
+async function getAllEmployeePunches(db, organizationId, getDocs, collection, query, where, previousPayPeriodISOStart, currentPayPeriodISOStart, currentPayPeriodISOEnd) {
   const usersSnapshot = await getDocs(collection(db, `organizations/${organizationId}/users`));
   const punchesData = {};
 
   for (const userDoc of usersSnapshot.docs) {
-      const userId = userDoc.id;
+    const userId = userDoc.id;
 
-      // Create a query to fetch punches within the date range
-      const punchesQuery = query(
-        collection(db, `organizations/${organizationId}/users/${userId}/punches`),
-        where("dateTime", ">=", startDate),
-        where("dateTime", "<=", endDate)
-      );
+    // Create a query to fetch punches within the date range
+    const punchesQuery = query(
+      collection(db, `organizations/${organizationId}/users/${userId}/punches`),
+      where("dateTime", ">=", previousPayPeriodISOStart),
+      where("dateTime", "<=", currentPayPeriodISOEnd)
+    );
 
-      // Make query a snapshotRequest
-      const punchesSnapshot = await getDocs(punchesQuery);
-      const punches = punchesSnapshot.docs.map(punchDoc => ({ id: punchDoc.id, ...punchDoc.data() }));
-      punchesData[userId] = {
-          user: { id: userId, ...userDoc.data() },
-          punches: punches
-      };
+    // Make query a snapshotRequest
+    const punchesSnapshot = await getDocs(punchesQuery);
+    const punches = punchesSnapshot.docs.map(punchDoc => ({ id: punchDoc.id, ...punchDoc.data() }));
+
+    // Split punches into previous and current pay periods
+    punchesData[userId] = {
+      previousPeriod: punches.filter(punch => punch.dateTime < currentPayPeriodISOStart),
+      currentPeriod: punches.filter(punch => punch.dateTime >= currentPayPeriodISOStart)
+    };
   }
 
   return punchesData;
 }
 
-function liStructure(name, previousPayPeriodHours, currentPeriodTotalHours, rateList, previousTimeSheet, currentTimeSheet) {
+function liStructure(name, userPunchData, rateList, previousTimeSheet, currentTimeSheet) {
+
+  const punchesPrevious = userPunchData.previousPeriod;
+  const punchesCurrent = userPunchData.currentPeriod;
+  const previousRateHours = calculateTotalHours(punchesPrevious);
+  const currentRateHours = calculateTotalHours(punchesCurrent);
+
+
   // Create a div for the employee details
   const employeeDiv = document.createElement('div');
   employeeDiv.classList.add('employee-details'); // Add a class for styling
@@ -100,7 +112,7 @@ function liStructure(name, previousPayPeriodHours, currentPeriodTotalHours, rate
   hoursContainer.appendChild(currentPayPeriodDate);
 
   // Loop through totalHours and create elements for each rate
-  for (const [rateId, hours] of Object.entries(currentPeriodTotalHours)) {
+  for (const [rateId, hours] of Object.entries(currentRateHours)) {
       const hoursElement = document.createElement('p');
       hoursElement.classList.add('rate-hours'); // Add a class for styling
       const rate = rateList.find(rate => rate.id === rateId);
@@ -117,7 +129,7 @@ function liStructure(name, previousPayPeriodHours, currentPeriodTotalHours, rate
   previousHoursContainer.appendChild(previousPayPeriodText);
 
   // Loop through previousPayPeriodHours and create elements for each rate
-  for (const [rateId, hours] of Object.entries(previousPayPeriodHours)) {
+  for (const [rateId, hours] of Object.entries(previousRateHours)) {
       const hoursElement = document.createElement('p');
       hoursElement.classList.add('rate-hours'); // Add a class for styling
       const rate = rateList.find(rate => rate.id === rateId);
