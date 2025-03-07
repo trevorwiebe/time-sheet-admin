@@ -68,51 +68,6 @@ export function isoToHtmlDateFormat(isoString) {
   return `${year}-${month}-${day}`;
 }
 
-/**
- * Calculates the start date of the current pay period using the current date.
- * Handles all date corner cases including leap years and ensures all calculations use UTC time.
- * 
- * @param {string|Date} goLiveDate - The initial pay period start date (when the system went live)
- * @returns {Date} The start date of the current pay period in UTC
- */
-// export function calculatePayPeriodStartDate(goLiveDate) {
-//   // Get current date internally
-//   const currentDateObj = new Date();
-  
-//   // Convert goLiveDate to a Date object if it's not already
-//   const goLiveDateObj = new Date(goLiveDate);
-  
-//   // Convert both dates to UTC midnight
-//   const goLiveUtc = new Date(Date.UTC(
-//     goLiveDateObj.getUTCFullYear(),
-//     goLiveDateObj.getUTCMonth(),
-//     goLiveDateObj.getUTCDate(),
-//     0, 0, 0, 0
-//   ));
-  
-//   const currentDateUtc = new Date(Date.UTC(
-//     currentDateObj.getUTCFullYear(),
-//     currentDateObj.getUTCMonth(),
-//     currentDateObj.getUTCDate(),
-//     0, 0, 0, 0
-//   ));
-
-//   // Calculate the number of milliseconds in 14 days (a pay period)
-//   const payPeriodMs = 14 * 24 * 60 * 60 * 1000;
-  
-//   // Calculate the elapsed time in milliseconds
-//   const elapsedMs = currentDateUtc.getTime() - goLiveUtc.getTime();
-  
-//   // Calculate how many complete pay periods have elapsed
-//   const completePeriods = Math.floor(elapsedMs / payPeriodMs);
-  
-//   // Calculate the most recent pay period start date
-//   // by adding the appropriate number of complete pay periods to the go-live date
-//   const payPeriodStartDate = new Date(goLiveUtc.getTime() + (completePeriods * payPeriodMs));
-  
-//   return payPeriodStartDate;
-// }
-
 export function formatDate(date) {
   const month = date.getMonth() + 1; // getMonth() returns 0-11
   const day = date.getDate();
