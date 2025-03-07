@@ -2,6 +2,9 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const nodemailer = require("nodemailer");
 const {log, error} = require("firebase-functions/logger");
+const {onRequest} = require("firebase-functions/v2/https");
+const {onSchedule} = require("firebase-functions/v2/scheduler");
+const {calculatePayPeriodStartDate, processOrg} = require("./utils.js");
 admin.initializeApp();
 
 exports.setCustomClaims = functions.https.onCall(async (data, context) => {
@@ -79,3 +82,104 @@ exports.sendWelcomeEmail = functions.https.onCall(async (data, context) => {
     throw new functions.https.HttpsError("internal", "Unable to send email.");
   }
 });
+
+exports.setNewTimeSheets = onSchedule("1 0 * * *", async (event) => {
+  const db = admin.firestore();
+  try {
+    // Fetch all organizations
+    const organizationsSnapshot = await db.collection("organizations").get();
+
+    // Create an array to hold all promises
+    const promises = [];
+
+    organizationsSnapshot.forEach((doc) => {
+      const organizationId = doc.id;
+      const goLiveDate = doc.data().goLiveDate;
+
+      // Get the current date
+      const date = new Date();
+      const todayAtStart = new Date(date);
+      todayAtStart.setHours(0, 0, 0, 0);
+
+      // Push the promise into our array
+      promises.push(
+          processOrg(db, organizationId, goLiveDate, todayAtStart),
+      );
+    });
+
+    // Wait for all promises to resolve
+    await Promise.all(promises);
+
+    console.log("Time sheets created successfully");
+    return null; // Return null when successful
+  } catch (error) {
+    console.error("Error in setNewTimeSheets function:", error);
+    throw new Error("Failed to create time sheets: " + error.message);
+  }
+});
+
+exports.manualTimesheetCreation = onRequest(async (req, res) => {
+  const db = admin.firestore();
+  try {
+    // Fetch all organizations
+    const organizationsSnapshot = await db.collection("organizations").get();
+    organizationsSnapshot.forEach(async (doc) => {
+      const organizationId = doc.id;
+      const goLiveDate = doc.data().goLiveDate;
+
+      // Get the current date
+      const date = new Date();
+      const todayAtStart = new Date(date);
+      todayAtStart.setHours(0, 0, 0, 0);
+
+      const usersSnapshot = await db.collection(
+          `organizations/${organizationId}/users`,
+      ).get();
+      const payPeriodStart = calculatePayPeriodStartDate(
+          goLiveDate, todayAtStart,
+      );
+      const payPeriodEnd = new Date(payPeriodStart);
+      payPeriodEnd.setDate(payPeriodEnd.getDate() + 14);
+      payPeriodEnd.setSeconds(payPeriodEnd.getSeconds() - 1);
+      payPeriodEnd.setMilliseconds(999);
+
+      usersSnapshot.forEach(async (userDoc) => {
+        const userId = userDoc.id;
+        const timeSheetRef = db.collection(
+            `organizations/${organizationId}/users/${userId}/timeSheets`,
+        );
+        const timeSheetDoc = await timeSheetRef.where(
+            "payPeriodStart", "==", payPeriodStart.toISOString(),
+        ).get();
+
+        // Check if TimeSheet object exists
+        if (timeSheetDoc.empty) {
+          // Create a new TimeSheet object
+          const newTimeSheet = {
+            payPeriodStart: payPeriodStart.toISOString(),
+            payPeriodEnd: payPeriodEnd.toISOString(),
+            vacationHours: 0.0,
+            holidayHours: 0.0,
+            confirmedByUser: false,
+          };
+          await timeSheetRef.add(newTimeSheet);
+          console.log(
+              `Created new TimeSheet for user ${userId}
+               in organization ${organizationId}`,
+          );
+        } else {
+          console.log(
+              `TimeSheet already exists for user ${userId} 
+              in organization ${organizationId}`,
+          );
+        }
+      });
+    });
+    res.status(200).send("Time sheets created successfully");
+  } catch (error) {
+    res.status(500).send(error);
+    log("Error fetching organizations:", error);
+    console.error("Error fetching organizations:", error);
+  }
+});
+
