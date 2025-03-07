@@ -15,7 +15,6 @@ export function loadUsers(
         const punches = punchData[user.id].punches;
         const rateHours = calculateTotalHours(punches);
         const timeSheets = timeSheetData[user.id];
-        console.log(timeSheets.currentTimeSheet);
 
         // Call liStructure to create the list item
         const listItem = liStructure(user.name, [], rateHours, rateList, timeSheets.previousTimeSheet, timeSheets.currentTimeSheet);
@@ -29,12 +28,16 @@ export function loadUsers(
 
   const relevantPayPeriods = getAllRelevantPayPeriods(org.goLiveDate);
 
+  // get the previousPayPeriodStart date and the currentPayPeriodEnd date so we can get all the past
+  // and current pay period punches. We will split them in half later
+  const previousPayPeriodISOStart = relevantPayPeriods.previousPeriod.isoStartDate;
+  const previousPayPeriodISOEnd = relevantPayPeriods.previousPeriod.isoEndDate;
   const currentPayPeriodISOStart = relevantPayPeriods.currentPeriod.isoStartDate;
   const currentPayPeriodISOEnd = relevantPayPeriods.currentPeriod.isoEndDate;
 
   // Chain the asynchronous operations
   Promise.all([
-    getAllEmployeePunches(db, org.id, getDocs, collection, query, where, currentPayPeriodISOStart, currentPayPeriodISOEnd),
+    getAllEmployeePunches(db, org.id, getDocs, collection, query, where, previousPayPeriodISOStart, currentPayPeriodISOEnd),
     getLastTwoTimesheetsForUsers(db, org.id)
   ]).then(([punchData, timesheetsData]) => {
     renderUserList(users, punchData, timesheetsData);
@@ -43,9 +46,6 @@ export function loadUsers(
   // Current pay period
   const payPeriodText = document.getElementById("current-pay-period");
   payPeriodText.textContent = `Current Pay Period: ${currentPayPeriodISOStart} - ${currentPayPeriodISOEnd}`;
-
-  const previousPayPeriodISOStart = relevantPayPeriods.previousPeriod.isoStartDate;
-  const previousPayPeriodISOEnd = relevantPayPeriods.previousPeriod.isoEndDate;
 
   // Previous pay period
   const previousPayPeriodText = document.getElementById("previous-pay-period");
