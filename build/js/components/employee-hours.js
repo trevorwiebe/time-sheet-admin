@@ -1,4 +1,4 @@
-import { getAllRelevantPayPeriods, getLastTwoTimesheetsForUsers } from "../utils/utils.js";
+import { getAllRelevantPayPeriods, getLastTwoTimesheetsForUsers } from "../utils/employee-utils.js";
 
 export function loadUsers(
   db, org, getDocs, collection, query, where,

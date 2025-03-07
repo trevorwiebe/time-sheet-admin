@@ -1,7 +1,7 @@
 let mRateList = "";
 let mAccountantList = "";
 
-import { convertToISOString, isoToHtmlDateFormat} from "../utils/utils.js";
+import { convertToISOString, isoToHtmlDateFormat} from "../utils/employee-utils.js";
 
 export async function setupOrganizationForm(db, addDoc, doc, getDoc, getDocs, setDoc, deleteDoc, collection, org, updateCallback) {
     

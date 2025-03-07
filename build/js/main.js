@@ -29,7 +29,7 @@ import { getFunctions, httpsCallable, connectFunctionsEmulator } from "https://w
 import { loadUserManagement } from "./components/user-management.js";
 import { setupOrganizationForm } from "./components/organization-details.js";
 import { loadUsers } from "./components/employee-hours.js";
-import { convertToISOString } from "./utils/utils.js";
+import { convertToISOString } from "./utils/employee-utils.js";
 
 let mUserOrgId = "";
 let mOrganization = "";
