@@ -88,7 +88,7 @@ export async function processUser(
       vacationHours: 0.0,
       holidayHours: 0.0,
       confirmedByUser: false,
-      submitted: false
+      submitted: false,
     };
 
     // Use add to create a new document with a generated ID

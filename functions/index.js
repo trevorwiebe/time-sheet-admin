@@ -4,7 +4,7 @@ const nodemailer = require("nodemailer");
 const {log, error} = require("firebase-functions/logger");
 const {onRequest} = require("firebase-functions/v2/https");
 const {onSchedule} = require("firebase-functions/v2/scheduler");
-const {calculatePayPeriodStartDate, processOrg} = require("./utils.js");
+const {processOrg} = require("./utils.js");
 admin.initializeApp();
 
 exports.setCustomClaims = functions.https.onCall(async (data, context) => {
