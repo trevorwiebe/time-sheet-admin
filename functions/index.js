@@ -123,7 +123,11 @@ exports.manualTimesheetCreation = onRequest(async (req, res) => {
   try {
     // Fetch all organizations
     const organizationsSnapshot = await db.collection("organizations").get();
-    organizationsSnapshot.forEach(async (doc) => {
+
+    // Create an array to hold all promises
+    const promises = [];
+
+    organizationsSnapshot.forEach((doc) => {
       const organizationId = doc.id;
       const goLiveDate = doc.data().goLiveDate;
 
@@ -132,50 +136,15 @@ exports.manualTimesheetCreation = onRequest(async (req, res) => {
       const todayAtStart = new Date(date);
       todayAtStart.setHours(0, 0, 0, 0);
 
-      const usersSnapshot = await db.collection(
-          `organizations/${organizationId}/users`,
-      ).get();
-      const payPeriodStart = calculatePayPeriodStartDate(
-          goLiveDate, todayAtStart,
+      // Push the promise into our array
+      promises.push(
+          processOrg(db, organizationId, goLiveDate, todayAtStart),
       );
-      const payPeriodEnd = new Date(payPeriodStart);
-      payPeriodEnd.setDate(payPeriodEnd.getDate() + 14);
-      payPeriodEnd.setSeconds(payPeriodEnd.getSeconds() - 1);
-      payPeriodEnd.setMilliseconds(999);
-
-      usersSnapshot.forEach(async (userDoc) => {
-        const userId = userDoc.id;
-        const timeSheetRef = db.collection(
-            `organizations/${organizationId}/users/${userId}/timeSheets`,
-        );
-        const timeSheetDoc = await timeSheetRef.where(
-            "payPeriodStart", "==", payPeriodStart.toISOString(),
-        ).get();
-
-        // Check if TimeSheet object exists
-        if (timeSheetDoc.empty) {
-          // Create a new TimeSheet object
-          const newTimeSheet = {
-            payPeriodStart: payPeriodStart.toISOString(),
-            payPeriodEnd: payPeriodEnd.toISOString(),
-            vacationHours: 0.0,
-            holidayHours: 0.0,
-            confirmedByUser: false,
-            submitted: false
-          };
-          await timeSheetRef.add(newTimeSheet);
-          console.log(
-              `Created new TimeSheet for user ${userId}
-               in organization ${organizationId}`,
-          );
-        } else {
-          console.log(
-              `TimeSheet already exists for user ${userId} 
-              in organization ${organizationId}`,
-          );
-        }
-      });
     });
+
+    // Wait for all promises to resolve
+    await Promise.all(promises);
+
     res.status(200).send("Time sheets created successfully");
   } catch (error) {
     res.status(500).send(error);

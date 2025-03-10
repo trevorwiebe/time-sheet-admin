@@ -42,9 +42,7 @@ export async function processOrg(db, organizationId, goLiveDate, todayAtStart) {
   const payPeriodStart = calculatePayPeriodStartDate(goLiveDate, todayAtStart);
   const payPeriodEnd = new Date(payPeriodStart);
 
-  payPeriodEnd.setDate(payPeriodEnd.getDate() + 14); // Add 14 days
-  payPeriodEnd.setSeconds(payPeriodEnd.getSeconds() - 1); // Subtract 1 second
-  payPeriodEnd.setMilliseconds(999); // Set milliseconds to 999
+  payPeriodEnd.setDate(payPeriodEnd.getDate() + 13);
 
   const userPromises = [];
 

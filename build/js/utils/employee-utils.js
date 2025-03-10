@@ -39,35 +39,35 @@ export function convertToISOString(dateString) {
   // Create a Date object from the input date string
   // Note: The date will be interpreted in the local timezone
   const date = new Date(dateString);
-  const timezoneOffset = date.getTimezoneOffset() * 60000; // Offset in milliseconds
-  const utcGoLiveDate = new Date(date.getTime() - timezoneOffset);
+  // const timezoneOffset = date.getTimezoneOffset() * 60000; // Offset in milliseconds
+  // const utcGoLiveDate = new Date(date.getTime() + timezoneOffset);
   
   // Check if the date is valid
-  if (isNaN(utcGoLiveDate.getTime())) {
+  if (isNaN(date.getTime())) {
     throw new Error("Invalid date format");
   }
   
   // Convert to ISO string (automatically converts to UTC)
-  return utcGoLiveDate.toISOString();
+  return date.toISOString();
 }
 
 export function isoToHtmlDateFormat(isoString) {
   // Create a Date object from the ISO string
   const date = new Date(isoString);
-  const timezoneOffset = date.getTimezoneOffset() * 60000; // Offset in milliseconds
-  const utcGoLiveDate = new Date(date.getTime() + timezoneOffset);
+  // const timezoneOffset = date.getTimezoneOffset() * 60000; // Offset in milliseconds
+  // const utcGoLiveDate = new Date(date.getTime() - timezoneOffset);
 
   // Check if the date is valid
-  if (isNaN(utcGoLiveDate.getTime())) {
+  if (isNaN(date.getTime())) {
     throw new Error("Invalid ISO date format");
   }
   
   // Format as YYYY-MM-DD (which is what HTML date inputs expect)
-  const year = utcGoLiveDate.getUTCFullYear();
+  const year = date.getUTCFullYear();
   // Month is 0-indexed in JavaScript, so add 1
   // padStart ensures two-digit format (e.g., "01" instead of "1")
-  const month = (utcGoLiveDate.getUTCMonth() + 1).toString().padStart(2, '0');
-  const day = utcGoLiveDate.getUTCDate().toString().padStart(2, '0');
+  const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+  const day = date.getUTCDate().toString().padStart(2, '0');
   
   return `${year}-${month}-${day}`;
 }
