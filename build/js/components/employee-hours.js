@@ -1,4 +1,4 @@
-import { getAllRelevantPayPeriods, getLastTwoTimesheetsForUsers } from "../utils/employee-utils.js";
+import { convertDateFormat, getAllRelevantPayPeriods, getLastTwoTimesheetsForUsers } from "../utils/employee-utils.js";
 
 export function loadUsers(
   db, org, getDocs, collection, query, where,
@@ -8,7 +8,6 @@ export function loadUsers(
 
   // Function to render the user list
   function renderUserList(users, punchData, timeSheetData) {
-    console.log(punchData);
     const emptyListNote = document.getElementById("empty_user_list");
     userList.innerHTML = ''; // Clear existing list
     if(users.length !== 0){
@@ -42,19 +41,20 @@ export function loadUsers(
     ),
     getLastTwoTimesheetsForUsers(db, org.id)
   ]).then(([punchData, timesheetsData]) => {
-    console.log(punchData);
     renderUserList(users, punchData, timesheetsData);
   });
 
   // Current pay period
   const payPeriodText = document.getElementById("current-pay-period");
-  payPeriodText.textContent = `Current Pay Period: ${currentPayPeriodISOStart} - ${currentPayPeriodISOEnd}`;
+  payPeriodText.textContent = `Current Pay Period: 
+    ${convertDateFormat(currentPayPeriodISOStart)} - ${convertDateFormat(currentPayPeriodISOEnd)
+  }`;
 
   // Previous pay period
   const previousPayPeriodText = document.getElementById("previous-pay-period");
   previousPayPeriodText.textContent = `Previous Pay Period: 
-    ${previousPayPeriodISOStart} - ${previousPayPeriodISOEnd}
-  `;
+    ${convertDateFormat(previousPayPeriodISOStart)} - ${convertDateFormat(previousPayPeriodISOEnd)
+  }`;
 }
 
 async function getAllEmployeePunches(db, organizationId, getDocs, collection, query, where, previousPayPeriodISOStart, currentPayPeriodISOStart, currentPayPeriodISOEnd) {

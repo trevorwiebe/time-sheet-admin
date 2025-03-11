@@ -80,6 +80,22 @@ export function formatDate(date) {
   return `${month}/${day}/${year}`;
 }
 
+export function convertDateFormat(dateString) {
+  // Remove any asterisks or extra whitespace
+  const cleanedDateString = dateString.replace(/\*/g, '').trim();
+  
+  // Create a Date object from the ISO string
+  const date = new Date(cleanedDateString);
+  
+  // Extract month, day, and year
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+  const day = String(date.getDate()).padStart(2, '0');
+  const year = date.getFullYear();
+  
+  // Return the formatted date string
+  return `${month}/${day}/${year}`;
+}
+
 /**
  * Calculates the start date of the current pay period using the current date.
  * Handles all date corner cases including leap years and DST transitions.
