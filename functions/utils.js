@@ -76,7 +76,7 @@ export async function processUser(
       `organizations/${organizationId}/users/${userId}/timeSheets`,
   );
   const timeSheetDoc = await timeSheetRef
-      .where("payPeriodStart", "==", payPeriodStart.toISOString())
+      .where("payPeriodStart", "==", payPeriodStart.toISOString().split("T")[0])
       .get();
 
   // Check if TimeSheet object exists
