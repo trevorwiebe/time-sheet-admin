@@ -48,7 +48,7 @@ export function convertToISOString(dateString) {
   }
   
   // Convert to ISO string (automatically converts to UTC)
-  return date.toISOString();
+  return date.toISOString().split('T')[0];
 }
 
 export function isoToHtmlDateFormat(isoString) {

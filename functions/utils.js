@@ -83,8 +83,8 @@ export async function processUser(
   if (timeSheetDoc.empty) {
     // Create a new TimeSheet object
     const newTimeSheet = {
-      payPeriodStart: payPeriodStart.toISOString(),
-      payPeriodEnd: payPeriodEnd.toISOString(),
+      payPeriodStart: payPeriodStart.toISOString().split("T")[0],
+      payPeriodEnd: payPeriodEnd.toISOString().split("T")[0],
       vacationHours: 0.0,
       holidayHours: 0.0,
       confirmedByUser: false,
