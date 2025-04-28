@@ -8,68 +8,87 @@ export async function loadTimeOffUsers(db, organizationId){
   const employees = await fetchAllEmployeesWithRequests(db, organizationId);
 
   if (employees.length > 0) {
+
+    // Create a map to keep track of existing employee list items
+    const existingItems = {};
+
       employees.forEach(employee => {
+          if (!existingItems[employee.id]) {
 
-          // Create a div for the employee details
-          const employeeDiv = document.createElement('div');
-          employeeDiv.classList.add('employee-time-off'); // Add a class for styling
+              // Create a div for the employee details
+              const employeeDiv = document.createElement('div');
+              employeeDiv.classList.add('employee-time-off'); 
 
-          // Create the employee name
-          const nameElement = document.createElement('h4');
-          nameElement.classList.add('employee-name'); // Add a class for styling
-          nameElement.textContent = employee.name; // Set the employee name
+              // Create the employee name
+              const nameElement = document.createElement('h4');
+              nameElement.classList.add('employee-name'); 
+              nameElement.textContent = employee.name;
+
+              employeeDiv.appendChild(nameElement);
+
+              userList.appendChild(employeeDiv);
+              existingItems[employee.id] = employeeDiv; 
+          }
 
           // Create a sublist for time-off requests
           const timeOffList = document.createElement('ul');
           employee.timeOffRequests.forEach(request => {
               const requestItem = document.createElement('div');
-              requestItem.classList.add('request-item'); // Add a class for styling
-
-              const timeOff = document.createElement('p');
-              timeOff.classList.add('request-time-off'); // Add a class for styling
-              timeOff.textContent = `Request: ${request.requestOffTime}`
-              requestItem.appendChild(timeOff); // Append the time-off request to the item
-            
-              if(request.timeOffRequestApproveTime) {
-                const dateApproved = document.createElement('p');
-                dateApproved.classList.add('request-date-approved'); // Add a class for styling
-                dateApproved.textContent = `Date Approved: ${request.timeOffRequestApproveTime}`;
-                requestItem.appendChild(dateApproved); // Append the date approved to the item
+              if(request.timeOffRequestApproveTime != null) {
+                requestItem.textContent = `Request: ${request.requestOffTime} - Date Approved: ${request.timeOffRequestApproveTime}`;
+              } else {
+                requestItem.textContent = `Request: ${request.requestOffTime}`;
               }
-            
+
               // Create the Approve button if date approved is null
               if (!request.timeOffRequestApproveTime) {
                   const approveButton = document.createElement('button');
-                  approveButton.classList.add('approve-button'); // Add a class for styling
                   approveButton.textContent = 'Approve';
+                  approveButton.classList.add('approve-button'); // Add a class for styling
                   approveButton.addEventListener('click', async () => {
                       await approveTimeOffRequest(db, organizationId, employee.id, request.id);
-                      // Optionally, refresh the employee list after approval
-                      loadTimeOffUsers(db, organizationId);
+                      // Update the request item without re-rendering the list
+                      requestItem.textContent = `Request: ${request.requestOffTime} - Date Approved: ${new Date().toISOString().split('T')[0]}`;
+                      // Create the Deny button
+                      const denyButton = document.createElement('button');
+                      denyButton.classList.add('deny-button'); // Add a class for styling
+                      denyButton.textContent = 'Delete';
+                      denyButton.addEventListener('click', async () => {
+                          await deleteTimeOffRequest(db, organizationId, employee.id, request.id);
+                          // Remove the request item from the list
+                          requestItem.remove();
+                      });
+                      requestItem.appendChild(denyButton);
                   });
                   requestItem.appendChild(approveButton);
 
+                  // Create the Deny button
                   const denyButton = document.createElement('button');
                   denyButton.classList.add('deny-button'); // Add a class for styling
                   denyButton.textContent = 'Deny';
                   denyButton.addEventListener('click', async () => {
                       await deleteTimeOffRequest(db, organizationId, employee.id, request.id);
-                      loadTimeOffUsers(db, organizationId);
+                      // Remove the request item from the list
+                      requestItem.remove();
+                  });
+                  requestItem.appendChild(denyButton);
+              }else{
+
+                  // Create the Deny button
+                  const denyButton = document.createElement('button');
+                  denyButton.classList.add('deny-button'); // Add a class for styling
+                  denyButton.textContent = 'Delete';
+                  denyButton.addEventListener('click', async () => {
+                      await deleteTimeOffRequest(db, organizationId, employee.id, request.id);
+                      // Remove the request item from the list
+                      requestItem.remove();
                   });
                   requestItem.appendChild(denyButton);
               }
 
-              const divider = document.createElement('divider');
-              divider.classList.add('divider'); // Add a class for styling
-              requestItem.appendChild(divider); // Append the divider to the request item
-
               timeOffList.appendChild(requestItem);
           });
-
-          // Append the name and time-off list to the employee div
-          employeeDiv.appendChild(nameElement);
-          employeeDiv.appendChild(timeOffList);
-          userList.appendChild(employeeDiv); // Append the employee div to the user list
+          existingItems[employee.id].appendChild(timeOffList);
       });
   } else {
       const emptyMessage = document.createElement('p');
@@ -104,7 +123,6 @@ async function approveTimeOffRequest(db, organizationId, userId, requestId) {
   const requestDocRef = doc(db, `organizations/${organizationId}/users/${userId}/timeOffRequests/${requestId}`);
   try {
       await updateDoc(requestDocRef, { timeOffRequestApproveTime: formattedDate });
-      console.log('Time off request approved successfully.');
   } catch (error) {
       console.error('Error approving time off request:', error);
   }
@@ -114,7 +132,6 @@ async function deleteTimeOffRequest(db, organizationId, userId, requestId) {
   const requestDocRef = doc(db, `organizations/${organizationId}/users/${userId}/timeOffRequests/${requestId}`);
   try {
       await deleteDoc(requestDocRef);
-      console.log('Time off request deleted successfully.');
   } catch (error) {
       console.error('Error deleting time off request:', error);
   }
