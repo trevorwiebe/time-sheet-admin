@@ -441,6 +441,67 @@ ul{
   box-shadow: 0px 0px 2px #3b3b3b;
 }
 
+.employee-time-off {
+  margin-top: 16px;
+  margin-bottom: 16px;
+  width: 100%;
+  border: 1px solid var(--tiertiary);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.approve-button{
+  width: 150px;
+}
+
+.request-item{
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0px;
+  align-items: center;
+}
+
+.request-time-off{
+  padding: 5px;
+  margin: 0px;
+}
+
+.request-date-approved{
+  padding: 5px;
+  margin: 0px;
+}
+
+.approve-button{
+  margin: 5px;
+  background-color: var(--backgroundGreen);
+  color: var(--green);
+}
+
+.approve-button:hover{
+  background-color: var(--green);
+  color: white;
+}
+
+.deny-button{
+  margin: 5px;
+  background-color: var(--backgroundRed);
+  color: var(--red);
+  width: 150px;
+}
+
+.deny-button:hover{
+  background-color: var(--red);
+  color: white;
+}
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background-color: var(--tiertiary);
+  margin: 10px 0;
+}
+
 .employee-name{
   padding-left: 10px;
   padding-right: 10px;

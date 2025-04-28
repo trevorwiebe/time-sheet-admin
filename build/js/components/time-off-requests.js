@@ -1,4 +1,4 @@
-import { getDocs, collection, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+import { deleteDoc, getDocs, collection, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
 export async function loadTimeOffUsers(db, organizationId){
 
@@ -9,32 +9,67 @@ export async function loadTimeOffUsers(db, organizationId){
 
   if (employees.length > 0) {
       employees.forEach(employee => {
-          const listItem = document.createElement('li');
-          listItem.textContent = employee.name; // Set the employee name
-          userList.appendChild(listItem); // Append the list item to the user list
+
+          // Create a div for the employee details
+          const employeeDiv = document.createElement('div');
+          employeeDiv.classList.add('employee-time-off'); // Add a class for styling
+
+          // Create the employee name
+          const nameElement = document.createElement('h4');
+          nameElement.classList.add('employee-name'); // Add a class for styling
+          nameElement.textContent = employee.name; // Set the employee name
 
           // Create a sublist for time-off requests
           const timeOffList = document.createElement('ul');
           employee.timeOffRequests.forEach(request => {
-              const requestItem = document.createElement('li');
-              console.log(request);
-              requestItem.textContent = `Request: ${request.requestOffTime} - Date Approved: ${request.timeOffRequestApproveTime}`;
+              const requestItem = document.createElement('div');
+              requestItem.classList.add('request-item'); // Add a class for styling
 
+              const timeOff = document.createElement('p');
+              timeOff.classList.add('request-time-off'); // Add a class for styling
+              timeOff.textContent = `Request: ${request.requestOffTime}`
+              requestItem.appendChild(timeOff); // Append the time-off request to the item
+            
+              if(request.timeOffRequestApproveTime) {
+                const dateApproved = document.createElement('p');
+                dateApproved.classList.add('request-date-approved'); // Add a class for styling
+                dateApproved.textContent = `Date Approved: ${request.timeOffRequestApproveTime}`;
+                requestItem.appendChild(dateApproved); // Append the date approved to the item
+              }
+            
               // Create the Approve button if date approved is null
               if (!request.timeOffRequestApproveTime) {
                   const approveButton = document.createElement('button');
+                  approveButton.classList.add('approve-button'); // Add a class for styling
                   approveButton.textContent = 'Approve';
                   approveButton.addEventListener('click', async () => {
                       await approveTimeOffRequest(db, organizationId, employee.id, request.id);
                       // Optionally, refresh the employee list after approval
                       loadTimeOffUsers(db, organizationId);
                   });
-                  requestItem.appendChild(approveButton); // Append the button to the request item
+                  requestItem.appendChild(approveButton);
+
+                  const denyButton = document.createElement('button');
+                  denyButton.classList.add('deny-button'); // Add a class for styling
+                  denyButton.textContent = 'Deny';
+                  denyButton.addEventListener('click', async () => {
+                      await deleteTimeOffRequest(db, organizationId, employee.id, request.id);
+                      loadTimeOffUsers(db, organizationId);
+                  });
+                  requestItem.appendChild(denyButton);
               }
+
+              const divider = document.createElement('divider');
+              divider.classList.add('divider'); // Add a class for styling
+              requestItem.appendChild(divider); // Append the divider to the request item
 
               timeOffList.appendChild(requestItem);
           });
-          listItem.appendChild(timeOffList); // Append the time-off requests list to the employee list item
+
+          // Append the name and time-off list to the employee div
+          employeeDiv.appendChild(nameElement);
+          employeeDiv.appendChild(timeOffList);
+          userList.appendChild(employeeDiv); // Append the employee div to the user list
       });
   } else {
       const emptyMessage = document.createElement('p');
@@ -72,5 +107,15 @@ async function approveTimeOffRequest(db, organizationId, userId, requestId) {
       console.log('Time off request approved successfully.');
   } catch (error) {
       console.error('Error approving time off request:', error);
+  }
+}
+
+async function deleteTimeOffRequest(db, organizationId, userId, requestId) {
+  const requestDocRef = doc(db, `organizations/${organizationId}/users/${userId}/timeOffRequests/${requestId}`);
+  try {
+      await deleteDoc(requestDocRef);
+      console.log('Time off request deleted successfully.');
+  } catch (error) {
+      console.error('Error deleting time off request:', error);
   }
 }
