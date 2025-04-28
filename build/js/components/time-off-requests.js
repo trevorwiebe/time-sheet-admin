@@ -1,4 +1,5 @@
 import { deleteDoc, getDocs, collection, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+import { formatDateString, formatDateToLongString } from "../utils/time-off-utils.js";
 
 export async function loadTimeOffUsers(db, organizationId){
 
@@ -20,11 +21,26 @@ export async function loadTimeOffUsers(db, organizationId){
               employeeDiv.classList.add('employee-time-off'); 
 
               // Create the employee name
-              const nameElement = document.createElement('h4');
+              const nameElement = document.createElement('p');
               nameElement.classList.add('employee-name'); 
               nameElement.textContent = employee.name;
 
+              const labelDiv = document.createElement('div');
+              labelDiv.classList.add('label-div');
+        
+              const timeOffLabel = document.createElement('p');
+              timeOffLabel.classList.add('label');
+              timeOffLabel.textContent = "Date Time Off Request";
+        
+              const approvedRequestDate = document.createElement('p');
+              approvedRequestDate.classList.add('label');
+              approvedRequestDate.textContent = "Approved Date";
+
+              labelDiv.appendChild(timeOffLabel);
+              labelDiv.appendChild(approvedRequestDate);
+
               employeeDiv.appendChild(nameElement);
+              employeeDiv.appendChild(labelDiv);
 
               userList.appendChild(employeeDiv);
               existingItems[employee.id] = employeeDiv; 
@@ -34,21 +50,57 @@ export async function loadTimeOffUsers(db, organizationId){
           const timeOffList = document.createElement('ul');
           employee.timeOffRequests.forEach(request => {
               const requestItem = document.createElement('div');
+              requestItem.classList.add('request-item');
+
+              const datesDiv = document.createElement('div');
+              datesDiv.classList.add('dates-div');
+
               if(request.timeOffRequestApproveTime != null) {
-                requestItem.textContent = `Request: ${request.requestOffTime} - Date Approved: ${request.timeOffRequestApproveTime}`;
+                const requestDate = document.createElement('p');
+                requestDate.classList.add('date');
+                requestDate.textContent = `${formatDateString(request.requestOffTime)}`;
+
+                const approveDate = document.createElement('p');
+                approveDate.classList.add('date');
+                approveDate.textContent = `${formatDateString(request.timeOffRequestApproveTime)}`;
+
+                datesDiv.appendChild(requestDate);
+                datesDiv.appendChild(approveDate);
               } else {
-                requestItem.textContent = `Request: ${request.requestOffTime}`;
+                const requestDate = document.createElement('p');
+                requestDate.classList.add('date');
+                requestDate.textContent = `${formatDateString(request.requestOffTime)}`;
+                datesDiv.appendChild(requestDate);
               }
+
+              requestItem.appendChild(datesDiv);
 
               // Create the Approve button if date approved is null
               if (!request.timeOffRequestApproveTime) {
+                const buttonSetDiv = document.createElement('div');
+                buttonSetDiv.classList.add('button-set'); // Add a class for styling
+
                   const approveButton = document.createElement('button');
                   approveButton.textContent = 'Approve';
                   approveButton.classList.add('approve-button'); // Add a class for styling
                   approveButton.addEventListener('click', async () => {
                       await approveTimeOffRequest(db, organizationId, employee.id, request.id);
                       // Update the request item without re-rendering the list
-                      requestItem.textContent = `Request: ${request.requestOffTime} - Date Approved: ${new Date().toISOString().split('T')[0]}`;
+
+                      datesDiv.innerHTML = ''; // Clear existing dates
+                      buttonSetDiv.innerHTML = ''; // Clear existing buttons
+
+                      const requestDate = document.createElement('p');
+                      requestDate.classList.add('date');
+                      requestDate.textContent = `${formatDateString(request.requestOffTime)}`;
+
+                      const approveDate = document.createElement('p');
+                      approveDate.classList.add('date');
+                      approveDate.textContent = `${formatDateToLongString(new Date())}`;
+
+                      datesDiv.appendChild(requestDate);
+                      datesDiv.appendChild(approveDate);
+
                       // Create the Deny button
                       const denyButton = document.createElement('button');
                       denyButton.classList.add('deny-button'); // Add a class for styling
@@ -60,7 +112,7 @@ export async function loadTimeOffUsers(db, organizationId){
                       });
                       requestItem.appendChild(denyButton);
                   });
-                  requestItem.appendChild(approveButton);
+                  buttonSetDiv.appendChild(approveButton);
 
                   // Create the Deny button
                   const denyButton = document.createElement('button');
@@ -71,7 +123,9 @@ export async function loadTimeOffUsers(db, organizationId){
                       // Remove the request item from the list
                       requestItem.remove();
                   });
-                  requestItem.appendChild(denyButton);
+                  buttonSetDiv.appendChild(denyButton);
+
+                  requestItem.appendChild(buttonSetDiv);
               }else{
 
                   // Create the Deny button

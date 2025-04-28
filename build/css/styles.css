@@ -453,11 +453,43 @@ ul{
   width: 150px;
 }
 
+.label-div{
+  width: 55%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 0px;
+  margin: 0px;
+  margin-left: 10px;
+}
+
+.dates-div{
+  width: 60%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 0px;
+  margin: 0px;
+}
+
+.label{
+  padding: 0px;
+  margin: 0px;
+  font-weight: bold;
+}
+
+.date{
+  padding: 0px;
+  margin: 0px;
+}
+
 .request-item{
   display: flex;
   flex-wrap: wrap;
-  padding: 0px;
+  padding-top: 5px;
+  padding-bottom: 5px;
   align-items: center;
+  justify-content: space-between;
 }
 
 .request-time-off{
@@ -471,9 +503,14 @@ ul{
 }
 
 .approve-button{
-  margin: 5px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  margin-right: 5px;
+  margin-left: 5px;
+  padding: 5px;
   background-color: var(--backgroundGreen);
   color: var(--green);
+  width: 100px;
 }
 
 .approve-button:hover{
@@ -482,10 +519,14 @@ ul{
 }
 
 .deny-button{
-  margin: 5px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  margin-right: 5px;
+  margin-left: 5px;
+  padding: 5px;
   background-color: var(--backgroundRed);
   color: var(--red);
-  width: 150px;
+  width: 100px;
 }
 
 .deny-button:hover{
@@ -501,9 +542,13 @@ ul{
 }
 
 .employee-name{
+  padding: 0px;
   padding-left: 10px;
   padding-right: 10px;
+  margin: 0px;
   width: 20%;
+  font-size: 25px;
+  font-weight: bold;
 }
 
 .hours-worked{
