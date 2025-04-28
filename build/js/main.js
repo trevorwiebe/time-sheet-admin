@@ -30,6 +30,7 @@ import { loadUserManagement } from "./components/user-management.js";
 import { setupOrganizationForm } from "./components/organization-details.js";
 import { loadUsers } from "./components/employee-hours.js";
 import { convertToISOString } from "./utils/employee-utils.js";
+import { loadTimeOffUsers } from "./components/time-off-requests.js";
 
 let mUserOrgId = "";
 let mOrganization = "";
@@ -190,6 +191,7 @@ async function loadPage(
     const response = await fetch("html/approve-time-off.html");
     const html = await response.text();
     content.innerHTML = html
+    loadTimeOffUsers(db, mOrganization.id);
   }
 }
 
