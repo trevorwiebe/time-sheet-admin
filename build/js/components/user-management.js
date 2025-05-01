@@ -38,6 +38,8 @@ export function loadUserManagement(
       const fullTime = document.getElementById("full-time").checked;
       const adminAccess = document.getElementById("admin-access").checked;
 
+      console.log(hireDate);
+
       // Call a function to handle adding the user (you'll need to implement this)
       await addNewUser(
         db, auth, 
@@ -106,7 +108,8 @@ async function addNewUser(
           hireDate: hireDate,
           organizationId: organizationId,
           fullTime: fullTime,
-          adminAccess: adminAccess
+          adminAccess: adminAccess,
+          ptoBalance: 0
       };
       return saveUserInDB(db, user, userId, organizationId, doc, setDoc);
     })
@@ -198,6 +201,7 @@ function createUserListItem(user, db, doc, setDoc, httpsCallable, functions, del
         email: email.value,
         hireDate: hireDate.value,
         fullTime: fullTime.checked,
+        ptoBalance: user.ptoBalance,
         adminAccess: adminAccess.checked,
         organizationId: user.organizationId
       }

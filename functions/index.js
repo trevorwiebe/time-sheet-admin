@@ -153,3 +153,73 @@ exports.manualTimesheetCreation = onRequest(async (req, res) => {
   }
 });
 
+exports.calculateEmployeePTO = onSchedule("1 0 * * *", async (event) => {
+  const db = admin.firestore();
+
+  try {
+    // Fetch all organizations
+    const organizationsSnapshot = await db.collection("organizations").get();
+
+    // Iterate through each organization
+    for (const orgDoc of organizationsSnapshot.docs) {
+      const organizationId = orgDoc.id;
+
+      // Fetch all users in the organization
+      const usersSnapshot = await db
+        .collection(`organizations/${organizationId}/users`)
+        .get();
+
+      // Iterate through each user
+      for (const userDoc of usersSnapshot.docs) {
+        const userData = userDoc.data();
+        const hireDate = userData.hireDate;
+
+        if (!hireDate || !userData.fullTime) continue;
+
+        const [hireYear, hireMonth, hireDay] = hireDate.split("-").map(Number);
+        const hireDateObj = new Date(hireYear, hireMonth - 1, hireDay);
+
+        const today = new Date();
+        const currentMonth = today.getMonth();
+        const currentDay = today.getDate();
+
+        // Handle leap year scenario
+        const isLeapYearHire = hireMonth === 2 && hireDay === 29;
+        const isLeapYear = (year) => (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+
+        const isAnniversary =
+          isLeapYearHire
+            ? (isLeapYear(today.getFullYear()) && currentMonth === 1 && currentDay === 29) ||
+              (!isLeapYear(today.getFullYear()) && currentMonth === 1 && currentDay === 28)
+            : currentMonth === hireDateObj.getMonth() && currentDay === hireDateObj.getDate();
+
+        if (isAnniversary) {
+          const yearsWorked = today.getFullYear() - hireDateObj.getFullYear();
+
+          // Determine PTO based on years worked
+          let ptoDays = 0;
+          if (yearsWorked === 1) ptoDays = 7;
+          else if (yearsWorked >= 2 && yearsWorked <= 4) ptoDays = 12;
+          else if (yearsWorked >= 5) ptoDays = 17;
+
+          // Update user's PTO balance
+          const currentPTO = userData.ptoBalance || 0;
+          const newPTOBalance = currentPTO + ptoDays;
+
+          await db
+            .collection(`organizations/${organizationId}/users`)
+            .doc(userDoc.id)
+            .update({ ptoBalance: newPTOBalance });
+
+          log(`PTO updated for user ${userDoc.id} in organization ${organizationId}`);
+        }
+      }
+    }
+
+    log("PTO calculation completed successfully");
+    res.status(200).send("PTO calculation completed successfully");
+  } catch (error) {
+    error("Error calculating PTO:", error);
+    res.status(500).send(error.message);
+  }
+});
