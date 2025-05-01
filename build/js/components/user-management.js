@@ -104,7 +104,6 @@ async function addNewUser(
       const user = {
           name: name,
           email: email,
-          availablePTO: 0,
           hireDate: hireDate,
           organizationId: organizationId,
           fullTime: fullTime,

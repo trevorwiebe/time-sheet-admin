@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const newUser = {
             name: user.displayName,
             email: user.email,
-            availablePTO: 0,
+            ptoBalance: 0,
             hireDate: formattedDate,
             organizationId: mUserOrgId,
             adminAccess: true
@@ -126,6 +126,8 @@ document.addEventListener("DOMContentLoaded", () => {
           const userDocRef = doc(db, `organizations/${mUserOrgId}/users/${user.uid}`);
           // Use setDoc to save the user data under the userId
           await setDoc(userDocRef, newUser);
+
+          await setHiddenPTOAndHolidayRates(db, mUserOrgId);
 
           // update refresh token after setting user and custom claims
           updateRefreshToken(auth);
@@ -383,6 +385,23 @@ async function updateRefreshToken(auth) {
       }
   } else {
       console.log('No user is currently signed in.');
+  }
+}
+
+async function setHiddenPTOAndHolidayRates(db, orgId) {
+  const rates = [
+    { description: "Holiday", userFacing: false },
+    { description: "Vacation", userFacing: false }
+  ];
+
+  try {
+    const ratesCollectionRef = collection(db, `organizations/${orgId}/rates`);
+    for (const rate of rates) {
+      await addDoc(ratesCollectionRef, rate);
+    }
+    console.log("Hidden PTO and Holiday rates added successfully.");
+  } catch (error) {
+    console.error("Error adding hidden rates:", error);
   }
 }
 
