@@ -35,12 +35,13 @@ export function loadUserManagement(
       const email = document.getElementById("user-email").value;
       const tempPassword = document.getElementById("temp-password").value;
       const hireDate = document.getElementById("hire-date").value;
+      const fullTime = document.getElementById("full-time").checked;
       const adminAccess = document.getElementById("admin-access").checked;
 
       // Call a function to handle adding the user (you'll need to implement this)
       await addNewUser(
         db, auth, 
-        name, email, tempPassword, hireDate, organizationId, adminAccess,
+        name, email, tempPassword, hireDate, organizationId, fullTime, adminAccess,
         doc, setDoc, deleteDoc, createUserWithEmailAndPassword,
         functions, httpsCallable, updateUserCallback
       );
@@ -73,6 +74,7 @@ async function addNewUser(
   tempPassword,
   hireDate,
   organizationId,
+  fullTime,
   adminAccess,
   doc,
   setDoc,
@@ -103,6 +105,7 @@ async function addNewUser(
           availablePTO: 0,
           hireDate: hireDate,
           organizationId: organizationId,
+          fullTime: fullTime,
           adminAccess: adminAccess
       };
       return saveUserInDB(db, user, userId, organizationId, doc, setDoc);
@@ -173,12 +176,14 @@ function createUserListItem(user, db, doc, setDoc, httpsCallable, functions, del
     const name = document.getElementById("edit-user-name");
     const email = document.getElementById("edit-user-email");
     const hireDate = document.getElementById("edit-hire-date");
+    const fullTime = document.getElementById("edit-full-time");
     const adminAccess = document.getElementById("edit-admin-access");
 
     // Fill fields with current user details
     name.value = user.name;
     email.value = user.email;
     hireDate.value = user.hireDate;
+    fullTime.checked = user.fullTime;
     adminAccess.checked = user.adminAccess;
 
     // Update user button
@@ -192,6 +197,7 @@ function createUserListItem(user, db, doc, setDoc, httpsCallable, functions, del
         name: name.value,
         email: email.value,
         hireDate: hireDate.value,
+        fullTime: fullTime.checked,
         adminAccess: adminAccess.checked,
         organizationId: user.organizationId
       }
