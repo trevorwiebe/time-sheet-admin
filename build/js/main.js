@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Fetch organization and users
         await fetchAllData(db, mUserOrgId, getDoc, getDocs);
 
-        loadPage("user-management", db, 
+        loadPage("employee-hours", db, 
           auth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser,
           doc, setDoc, getDoc, getDocs, addDoc, collection, deleteDoc,
           functions, httpsCallable
