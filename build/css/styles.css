@@ -29,7 +29,6 @@ body {
 header {
   background: var(--primary);
   color: black;
-  padding: 1rem;
   text-align: center;
   width: 100%;
   display: none;
@@ -78,10 +77,10 @@ nav {
 }
 
 .menu {
+  width: 100%;
   list-style: none;
   display: flex;
   justify-content: center;
-  padding: 0;
   margin: 0;
 }
 
@@ -90,18 +89,23 @@ nav {
 }
 
 .menu a {
+  display: inline-block; /* Ensures block-like behavior while allowing inline flow */
   text-decoration: none;
-  color: black;
+  border-radius: 6px;
+  color: black;  
   font-weight: bold;
-  padding: 10px;
+  padding: 10px 12px; /* Ensures enough horizontal padding for multiline */
   text-align: center;
+  white-space: normal; /* Allows wrapping if needed */
+  line-height: 1.4; /* Improves vertical spacing on wrap */
 }
 
 .menu a:hover {
   transition: 0.2s;
-  background-color: var(--secondary);
+  background-color: var(--tiertiary);
   border-radius: 6px;
   color: white;
+  background-color: var(--tiertiary);
 }
 
 footer {
