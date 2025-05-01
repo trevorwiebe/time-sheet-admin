@@ -124,7 +124,7 @@ async function saveRate(db, addDoc, collection, organizationId, rate) {
         const ratesCollectionRef = collection(db, `organizations/${organizationId}/rates`);
 
         // Save the rate in Firestore with an auto-generated ID
-        const docRef = await addDoc(ratesCollectionRef, { description: rate });
+        const docRef = await addDoc(ratesCollectionRef, { description: rate, userFacing: true });
 
         return { id: docRef.id, description: rate };
     } catch (error) {
@@ -140,7 +140,9 @@ async function fetchRates(db, organizationId, collection, getDocs) {
 
         // Fetch all rates from Firestore
         const ratesSnapshot = await getDocs(ratesCollectionRef);
-        const rates = ratesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const rates = ratesSnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter(rate => rate.userFacing);
         return rates;
     } catch (error) {
         console.error('Error fetching rates:', error);
