@@ -391,7 +391,7 @@ async function updateRefreshToken(auth) {
 async function setHiddenPTOAndHolidayRates(db, orgId) {
   const rates = [
     { description: "Holiday", userFacing: false },
-    { description: "Vacation", userFacing: false }
+    { description: "PTO", userFacing: false }
   ];
 
   try {
