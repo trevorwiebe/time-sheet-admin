@@ -180,6 +180,9 @@ function calculateTotalHours(punches) {
     const punch1 = punches[i];
     const punch2 = punches[i + 1];
     const startDate = new Date(punch1.dateTime);
+    if(punch2 === undefined){
+      continue;
+    }
     const endDate = new Date(punch2.dateTime);
     
     // Calculate difference in milliseconds
