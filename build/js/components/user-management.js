@@ -195,17 +195,16 @@ function createUserListItem(user, db, doc, setDoc, httpsCallable, functions, del
       e.preventDefault();
 
       const newUser = {
-        id: user.id,
         name: name.value,
         email: email.value,
         hireDate: hireDate.value,
         fullTime: fullTime.checked,
-        ptoBalance: user.ptoBalance,
+        ptoBalance: 0,
         adminAccess: adminAccess.checked,
         organizationId: user.organizationId
       }
 
-      updateUser(newUser, db, setDoc, doc, httpsCallable, functions);
+      updateUser(user.id, newUser, db, setDoc, doc, httpsCallable, functions);
     })
 
     // Delete user button
@@ -240,8 +239,7 @@ async function updateRefreshToken(auth) {
 }
 
 // Update user in auth and in firestore
-async function updateUser(newUser, db, setDoc, doc, httpsCallable, functions) {
-  const uid = newUser.id;
+async function updateUser(uid, newUser, db, setDoc, doc, httpsCallable, functions) {
   const email = newUser.email;
   const displayName = newUser.name;
   const organizationId = newUser.organizationId;
