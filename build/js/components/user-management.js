@@ -108,7 +108,7 @@ async function addNewUser(
           organizationId: organizationId,
           fullTime: fullTime,
           adminAccess: adminAccess,
-          ptoBalance: 0
+          ptoBalance: 56
       };
       return saveUserInDB(db, user, userId, organizationId, doc, setDoc);
     })
@@ -199,7 +199,7 @@ function createUserListItem(user, db, doc, setDoc, httpsCallable, functions, del
         email: email.value,
         hireDate: hireDate.value,
         fullTime: fullTime.checked,
-        ptoBalance: 0,
+        ptoBalance: 56,
         adminAccess: adminAccess.checked,
         organizationId: user.organizationId
       }

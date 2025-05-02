@@ -201,14 +201,13 @@ exports.calculateEmployeePTO = onSchedule("1 0 * * *", async (event) => {
           const yearsWorked = today.getFullYear() - hireDateObj.getFullYear();
 
           // Determine PTO based on years worked
-          let ptoDays = 0;
-          if (yearsWorked === 1) ptoDays = 7;
-          else if (yearsWorked >= 2 && yearsWorked <= 4) ptoDays = 12;
-          else if (yearsWorked >= 5) ptoDays = 17;
+          let ptoHours = 0;
+          if (yearsWorked >= 1 && yearsWorked <= 4) ptoHours = 96;
+          else if (yearsWorked >= 5) ptoHours = 136;
 
           // Update user's PTO balance
           const currentPTO = userData.ptoBalance || 0;
-          const newPTOBalance = currentPTO + ptoDays;
+          const newPTOBalance = currentPTO + ptoHours;
 
           await db
               .collection(`organizations/${organizationId}/users`)
